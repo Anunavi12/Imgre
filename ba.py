@@ -4,7 +4,6 @@ import random
 import hashlib
 from datetime import datetime, timedelta
 from io import BytesIO
-from fpdf import FPDF
 import unicodedata
 import pandas as pd
 
@@ -1739,4 +1738,5 @@ elif st.session_state.current_page == "hardness_summary":
     st.markdown("---")
     if st.button("🏠 Back to Main Analysis", use_container_width=True, type="primary"):
         st.session_state.current_page = "page1"
+
         st.rerun()
