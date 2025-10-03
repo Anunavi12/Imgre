@@ -699,14 +699,39 @@ ACCOUNT_INDUSTRY_MAP = {
     "Hyatt": "Hospitality",
     "Airbnb": "Hospitality",
     # Education
-    "Skill Development": "Education",
+    "Skill Development": "Government",
     "Coursera": "Education",
     "Udemy": "Education",
     "Khan Academy": "Education",
+    # Defence
+"Indian Army": "Defence",
+"Indian Navy": "Defence",
+"Indian Air Force": "Defence",
+"DRDO": "Defence",
+"HAL": "Defence",
+"ISRO": "Defence",
+
+# Marketing
+"SEO": "Marketing",
+"Social Media Ads": "Marketing",
+"Google Analytics": "Marketing",
+"Content Marketing": "Marketing",
+"Email Campaigns": "Marketing",
+"Brand Management": "Marketing",
+
+# Manufacturing
+"Automobile": "Manufacturing",
+"Textiles": "Manufacturing",
+"Electronics": "Manufacturing",
+"Steel": "Manufacturing",
+"Cement": "Manufacturing",
+"Pharmaceuticals": "Manufacturing",
+"FMCG": "Manufacturing",
+
     # Other
-    "BLR Airport": "Other",
-    "THD": "Other",
-    "Tmobile": "Other",
+    "BLR Airport": "Airlines",
+    "THD": "Retail",
+    "Tmobile": "Telecomunication",
     "Mu Labs": "Other",
 }
 
@@ -1740,3 +1765,4 @@ elif st.session_state.current_page == "hardness_summary":
         st.session_state.current_page = "page1"
 
         st.rerun()
+
