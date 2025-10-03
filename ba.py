@@ -618,6 +618,7 @@ HEADERS_BASE = {"Content-Type": "application/json"}
 # EXPANDED ACCOUNTS with Industry Mapping
 ACCOUNT_INDUSTRY_MAP = {
     "Select Account": "Select Industry",
+
     # Pharmaceutical
     "Abbvie": "Pharma",
     "BMS": "Pharma",
@@ -626,6 +627,7 @@ ACCOUNT_INDUSTRY_MAP = {
     "Novartis": "Pharma",
     "Merck": "Pharma",
     "Roche": "Pharma",
+
     # Technology
     "Microsoft": "Technology",
     "DELL": "Technology",
@@ -634,6 +636,7 @@ ACCOUNT_INDUSTRY_MAP = {
     "SAP": "Technology",
     "Salesforce": "Technology",
     "Adobe": "Technology",
+
     # Retail
     "Walmart": "Retail",
     "Target": "Retail",
@@ -642,6 +645,7 @@ ACCOUNT_INDUSTRY_MAP = {
     "Coles": "Retail",
     "Tesco": "Retail",
     "Carrefour": "Retail",
+
     # Airlines
     "Southwest Airlines": "Airlines",
     "Delta Airlines": "Airlines",
@@ -649,6 +653,7 @@ ACCOUNT_INDUSTRY_MAP = {
     "American Airlines": "Airlines",
     "Emirates": "Airlines",
     "Lufthansa": "Airlines",
+
     # Consumer Goods
     "Nike": "Consumer Goods",
     "Adidas": "Consumer Goods",
@@ -656,12 +661,14 @@ ACCOUNT_INDUSTRY_MAP = {
     "Procter & Gamble": "Consumer Goods",
     "Coca-Cola": "Consumer Goods",
     "PepsiCo": "Consumer Goods",
+
     # Energy
     "Chevron": "Energy",
     "ExxonMobil": "Energy",
     "Shell": "Energy",
     "BP": "Energy",
     "TotalEnergies": "Energy",
+
     # Finance
     "JPMorgan Chase": "Finance",
     "Bank of America": "Finance",
@@ -669,74 +676,92 @@ ACCOUNT_INDUSTRY_MAP = {
     "Goldman Sachs": "Finance",
     "Morgan Stanley": "Finance",
     "Citigroup": "Finance",
+
     # Healthcare
     "UnitedHealth": "Healthcare",
     "CVS Health": "Healthcare",
     "Anthem": "Healthcare",
     "Humana": "Healthcare",
     "Kaiser Permanente": "Healthcare",
+
     # Logistics
     "FedEx": "Logistics",
     "UPS": "Logistics",
     "DHL": "Logistics",
     "Maersk": "Logistics",
     "Amazon Logistics": "Logistics",
+
     # E-commerce
     "Amazon": "E-commerce",
     "Alibaba": "E-commerce",
     "eBay": "E-commerce",
     "Shopify": "E-commerce",
     "Flipkart": "E-commerce",
+
     # Automotive
     "Tesla": "Automotive",
     "Ford": "Automotive",
     "General Motors": "Automotive",
     "Toyota": "Automotive",
     "Volkswagen": "Automotive",
+
     # Hospitality
     "Marriott": "Hospitality",
     "Hilton": "Hospitality",
     "Hyatt": "Hospitality",
     "Airbnb": "Hospitality",
+
     # Education
     "Skill Development": "Government",
     "Coursera": "Education",
     "Udemy": "Education",
     "Khan Academy": "Education",
+
     # Defence
-"Indian Army": "Defence",
-"Indian Navy": "Defence",
-"Indian Air Force": "Defence",
-"DRDO": "Defence",
-"HAL": "Defence",
-"ISRO": "Defence",
+    "Indian Army": "Defence",
+    "Indian Navy": "Defence",
+    "Indian Air Force": "Defence",
+    "DRDO": "Defence",
+    "HAL": "Defence",
+    "ISRO": "Defence",
 
-# Marketing
-"SEO": "Marketing",
-"Social Media Ads": "Marketing",
-"Google Analytics": "Marketing",
-"Content Marketing": "Marketing",
-"Email Campaigns": "Marketing",
-"Brand Management": "Marketing",
+    # Marketing
+    "SEO": "Marketing",
+    "Social Media Ads": "Marketing",
+    "Google Analytics": "Marketing",
+    "Content Marketing": "Marketing",
+    "Email Campaigns": "Marketing",
+    "Brand Management": "Marketing",
 
-# Manufacturing
-"Automobile": "Manufacturing",
-"Textiles": "Manufacturing",
-"Electronics": "Manufacturing",
-"Steel": "Manufacturing",
-"Cement": "Manufacturing",
-"Pharmaceuticals": "Manufacturing",
-"FMCG": "Manufacturing",
+    # Manufacturing
+    "Automobile": "Manufacturing",
+    "Textiles": "Manufacturing",
+    "Electronics": "Manufacturing",
+    "Steel": "Manufacturing",
+    "Cement": "Manufacturing",
+    "Pharmaceuticals": "Manufacturing",
+    "FMCG": "Manufacturing",
 
-    # Other
+    # IoT
+    "Siemens": "IoT",
+    "Bosch": "IoT",
+    "Honeywell": "IoT",
+    "GE Digital": "IoT",
+    "PTC": "IoT",
+    "Schneider Electric": "IoT",
+
+    # Other / Miscellaneous
     "BLR Airport": "Airlines",
     "THD": "Retail",
     "Tmobile": "Telecomunication",
     "Mu Labs": "Other",
+    "SpaceX": "Other",
+    "OpenAI": "Other",
 }
 
 ACCOUNTS = sorted(list(ACCOUNT_INDUSTRY_MAP.keys()))
 INDUSTRIES = sorted(list(set(ACCOUNT_INDUSTRY_MAP.values())))
+
 
 # === API CONFIGURATION ===
 API_CONFIGS = [
@@ -1765,4 +1790,5 @@ elif st.session_state.current_page == "hardness_summary":
         st.session_state.current_page = "page1"
 
         st.rerun()
+
 
