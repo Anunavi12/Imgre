@@ -101,7 +101,7 @@ div[data-testid="stVerticalBlock"] > div:empty { display: none !important; }
     letter-spacing: -0.5px;
 }
 
-/* Musigma logo overlay - place a small logo in top-right corner */
+/* Mu-Sigma Logo - Fixed positioning with color protection */
 .musigma-logo {
     position: fixed;
     top: 14px;
@@ -112,29 +112,64 @@ div[data-testid="stVerticalBlock"] > div:empty { display: none !important; }
     border: 2px solid rgba(255,255,255,0.9);
     box-shadow: 0 8px 28px rgba(0,0,0,0.18);
     z-index: 9999;
-    background-size: contain;
-    background-repeat: no-repeat;
-    background-position: center;
+    background: transparent !important;
     opacity: 0.99;
     transition: transform 0.15s ease, box-shadow 0.15s ease;
+    overflow: hidden;
+    /* Prevent any color inheritance */
+    background-color: transparent !important;
+    background-image: none !important;
 }
-.musigma-logo:hover { transform: translateY(-4px) scale(1.02); box-shadow: 0 12px 36px rgba(0,0,0,0.22); }
-@media (max-width: 640px) { .musigma-logo { display: none !important; } }
 
-/* Ensure inline logo images keep their original colors and are not affected by global link/color styles */
+.musigma-logo:hover { 
+    transform: translateY(-4px) scale(1.02); 
+    box-shadow: 0 12px 36px rgba(0,0,0,0.22);
+}
+
+@media (max-width: 640px) { 
+    .musigma-logo { 
+        display: none !important; 
+    } 
+}
+
+/* Logo image - complete color protection */
 .musigma-logo img {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-    display: block;
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: contain !important;
+    display: block !important;
+    /* Prevent any color filters or transformations */
     filter: none !important;
     mix-blend-mode: normal !important;
+    background: transparent !important;
+    /* Reset any inherited styles */
+    color: inherit !important;
+    background-color: transparent !important;
+    border: none !important;
+    outline: none !important;
+    /* Prevent any text rendering issues */
+    font-size: 0 !important;
+    line-height: 0 !important;
 }
 
-/* Force any text inside the logo container to be white (fallback) and prevent link color overrides */
-.musigma-logo, .musigma-logo * {
-    color: #ffffff !important;
-    -webkit-text-fill-color: #ffffff !important;
+/* Link wrapper protection */
+.musigma-logo-link {
+    background: transparent !important;
+    text-decoration: none !important;
+    display: inline-block !important;
+}
+
+/* Force remove any gradient/color backgrounds */
+.musigma-logo,
+.musigma-logo *,
+.musigma-logo-link,
+.musigma-logo-link * {
+    background: transparent !important;
+    background-image: none !important;
+    background-color: transparent !important;
+    /* Remove any text color inheritance */
+    color: inherit !important;
+    -webkit-text-fill-color: inherit !important;
 }
 
 /* --- SECTION HEADINGS --- */
@@ -2065,19 +2100,67 @@ elif st.session_state.current_page == "hardness_summary":
         except Exception:
             st.markdown("<div class='info-card'>Unable to create download at this time.</div>", unsafe_allow_html=True)
 
+# Mu-Sigma Logo with enhanced color protection
+st.markdown("""
+<style>
+/* Additional protection against Streamlit color overrides */
+[data-testid="stAppViewContainer"] .musigma-logo,
+[data-testid="stAppViewContainer"] .musigma-logo * {
+    background: transparent !important;
+    background-image: none !important;
+    filter: none !important;
+    mix-blend-mode: normal !important;
+}
+
+/* Ensure logo stays on top of all Streamlit elements */
+.musigma-logo {
+    z-index: 999999 !important;
+}
+</style>
+""", unsafe_allow_html=True)
+
 import base64
 logo_path = os.path.join(os.path.dirname(__file__), 'musigma_logo.png')
 logo_html = ''
+
 if os.path.exists(logo_path):
-    with open(logo_path, 'rb') as f:
-        data = f.read()
-    b64 = base64.b64encode(data).decode('utf-8')
-    # Render the image as an inline <img> to avoid CSS background blending or recoloring
-    img_tag = f"<img src='data:image/png;base64,{b64}' alt='Mu-sigma logo'/>"
-    logo_html = f"<a href='https://mu-sigma.com' target='_blank' rel='noopener'><div class='musigma-logo' role='img' aria-label='Mu-sigma logo'>{img_tag}</div></a>"
+    try:
+        with open(logo_path, 'rb') as f:
+            data = f.read()
+        b64 = base64.b64encode(data).decode('utf-8')
+        # Use SVG wrapper for better color preservation
+        img_tag = f"""
+        <img src='data:image/png;base64,{b64}' 
+             alt='Mu-Sigma Logo' 
+             style='width: 100%; height: 100%; object-fit: contain; display: block;' 
+             onerror=\"this.style.display='none'; this.parentNode.innerHTML='μσ';\"
+        />
+        """
+        logo_html = f"""
+        <a href='https://mu-sigma.com' target='_blank' rel='noopener' class='musigma-logo-link'>
+            <div class='musigma-logo' role='img' aria-label='Mu-Sigma logo'>
+                {img_tag}
+            </div>
+        </a>
+        """
+    except Exception as e:
+        # Fallback if image loading fails
+        logo_html = """
+        <a href='https://mu-sigma.com' target='_blank' rel='noopener' class='musigma-logo-link'>
+            <div class='musigma-logo' style='display:flex;align-items:center;justify-content:center;color:#000;font-weight:700;font-family:sans-serif;background:white;'>
+                μσ
+            </div>
+        </a>
+        """
 else:
-    # Fallback: render a small textual badge so there's visual indication even if the file is missing
-    logo_html = "<a href='https://mu-sigma.com' target='_blank' rel='noopener'><div class='musigma-logo' style='display:flex;align-items:center;justify-content:center;background:#8b1e1e;color:#fff;font-weight:700;font-family:sans-serif;'>μσ</div></a>"
+    # Text fallback with neutral colors
+    logo_html = """
+    <a href='https://mu-sigma.com' target='_blank' rel='noopener' class='musigma-logo-link'>
+        <div class='musigma-logo' style='display:flex;align-items:center;justify-content:center;color:#000;font-weight:700;font-family:sans-serif;background:white;'>
+            μσ
+        </div>
+    </a>
+    """
 
 st.markdown(logo_html, unsafe_allow_html=True)
 
@@ -2123,4 +2206,5 @@ st.markdown('''
 })();
 </script>
 ''', unsafe_allow_html=True)
+
 
