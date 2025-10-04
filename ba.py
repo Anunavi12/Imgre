@@ -4,7 +4,6 @@ import random
 import hashlib
 from datetime import datetime, timedelta
 from io import BytesIO
-from fpdf import FPDF
 import unicodedata
 import pandas as pd
 
@@ -1989,3 +1988,4 @@ elif st.session_state.current_page == "hardness_summary":
             st.download_button(label="⬇️ Download Report (TXT)", data=report_content, file_name="hardness_report.txt", mime="text/plain")
         except Exception:
             st.markdown("<div class='info-card'>Unable to create download at this time.</div>", unsafe_allow_html=True)
+
