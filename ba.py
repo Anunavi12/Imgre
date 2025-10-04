@@ -121,6 +121,22 @@ div[data-testid="stVerticalBlock"] > div:empty { display: none !important; }
 .musigma-logo:hover { transform: translateY(-4px) scale(1.02); box-shadow: 0 12px 36px rgba(0,0,0,0.22); }
 @media (max-width: 640px) { .musigma-logo { display: none !important; } }
 
+/* Ensure inline logo images keep their original colors and are not affected by global link/color styles */
+.musigma-logo img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+    filter: none !important;
+    mix-blend-mode: normal !important;
+}
+
+/* Force any text inside the logo container to be white (fallback) and prevent link color overrides */
+.musigma-logo, .musigma-logo * {
+    color: #ffffff !important;
+    -webkit-text-fill-color: #ffffff !important;
+}
+
 /* --- SECTION HEADINGS --- */
 h2, h3, h4, h5, h6,
 .stMarkdown h2, .stMarkdown h3, .stMarkdown h4, .stMarkdown h5, .stMarkdown h6,
@@ -2056,7 +2072,9 @@ if os.path.exists(logo_path):
     with open(logo_path, 'rb') as f:
         data = f.read()
     b64 = base64.b64encode(data).decode('utf-8')
-    logo_html = f"<a href='https://mu-sigma.com' target='_blank' rel='noopener'><div class='musigma-logo' style=\"background-image: url('data:image/png;base64,{b64}');\"></div></a>"
+    # Render the image as an inline <img> to avoid CSS background blending or recoloring
+    img_tag = f"<img src='data:image/png;base64,{b64}' alt='Mu-sigma logo'/>"
+    logo_html = f"<a href='https://mu-sigma.com' target='_blank' rel='noopener'><div class='musigma-logo' role='img' aria-label='Mu-sigma logo'>{img_tag}</div></a>"
 else:
     # Fallback: render a small textual badge so there's visual indication even if the file is missing
     logo_html = "<a href='https://mu-sigma.com' target='_blank' rel='noopener'><div class='musigma-logo' style='display:flex;align-items:center;justify-content:center;background:#8b1e1e;color:#fff;font-weight:700;font-family:sans-serif;'>μσ</div></a>"
