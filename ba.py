@@ -2100,10 +2100,10 @@ elif st.session_state.current_page == "hardness_summary":
         except Exception:
             st.markdown("<div class='info-card'>Unable to create download at this time.</div>", unsafe_allow_html=True)
 
-# Mu-Sigma Logo - URL Version (Reliable)
+# Mu-Sigma Logo - Multiple URL Options with Strong Fallbacks
 st.markdown("""
 <style>
-/* Mu-Sigma Logo Styles - URL Version */
+/* Mu-Sigma Logo Styles */
 .musigma-logo {
     position: fixed;
     top: 14px;
@@ -2121,6 +2121,7 @@ st.markdown("""
     display: flex;
     align-items: center;
     justify-content: center;
+    font-family: 'Inter', sans-serif;
 }
 
 .musigma-logo:hover { 
@@ -2149,6 +2150,20 @@ st.markdown("""
     display: inline-block !important;
 }
 
+/* Text fallback styling */
+.musigma-text-fallback {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    color: white !important;
+    font-weight: 700;
+    font-size: 24px;
+    border-radius: 8px;
+}
+
 /* Ensure logo stays on top */
 [data-testid="stAppViewContainer"] .musigma-logo {
     z-index: 999999 !important;
@@ -2156,19 +2171,50 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# URL-based Mu-Sigma logo implementation
-logo_html = """
+# Multiple URL options for Mu-Sigma logo
+logo_urls = [
+    'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5a/Mu_Sigma_Logo.svg/1200px-Mu_Sigma_Logo.svg.png',
+    'https://res.cloudinary.com/crunchbase-production/image/upload/c_lpad,f_auto,q_auto:eco,dpr_1/v1397189929/53712c6b45c2b10a5caff703aec5ad67.png',
+    'https://images.crunchbase.com/image/upload/c_lpad,f_auto,q_auto:eco,dpr_1/v1476120682/ypohk3ybtqb2gnq8hqxi.png',
+    'https://logos-world.net/wp-content/uploads/2023/12/Mu-Sigma-Logo.png'
+]
+
+# Create the logo HTML with multiple fallback options
+logo_html = f"""
 <a href='https://mu-sigma.com' target='_blank' rel='noopener' class='musigma-logo-link'>
     <div class='musigma-logo' role='img' aria-label='Mu-Sigma logo'>
-        <img src='https://images.crunchbase.com/image/upload/c_lpad,f_auto,q_auto:eco,dpr_1/v1476120682/ypohk3ybtqb2gnq8hqxi.png' 
-             alt='Mu-Sigma Logo' 
-             onerror=\"this.onerror=null; this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODAiIGhlaWdodD0iODAiIHZpZXdCb3g9IjAgMCA4MCA4MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iODAiIGhlaWdodD0iODAiIHJ4PSIxMCIgZmlsbD0iIzhiMWUxZSIvPjx0ZXh0IHg9IjQwIiB5PSI0OCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjI0IiBmb250LXdlaWdodD0iYm9sZCIgZmlsbD0id2hpdGUiPuaygPCfpo88L3RleHQ+PC9zdmc+';\" 
+        <img src='{logo_urls[0]}' 
+             alt='Mu-Sigma Logo'
+             style='width: 100%; height: 100%; object-fit: contain; background: white; padding: 8px; border-radius: 6px;'
+             onerror=\"this.onerror=null; this.src='{logo_urls[1]}';\"
+             onerror2=\"this.onerror2=null; this.src='{logo_urls[2]}';\"
         />
     </div>
 </a>
 """
 
 st.markdown(logo_html, unsafe_allow_html=True)
+
+# Alternative: If URLs don't work, use this SVG version instead
+st.markdown("""
+<script>
+// Check if logo loaded properly after 2 seconds
+setTimeout(function() {
+    const logo = document.querySelector('.musigma-logo img');
+    if (logo && (logo.naturalWidth === 0 || logo.complete === false)) {
+        // Replace with SVG fallback
+        const logoContainer = document.querySelector('.musigma-logo');
+        if (logoContainer) {
+            logoContainer.innerHTML = `
+                <div class="musigma-text-fallback">
+                    μσ
+                </div>
+            `;
+        }
+    }
+}, 2000);
+</script>
+""", unsafe_allow_html=True)
 # Inject JS/CSS: hide logo when user scrolls down, animate on load, and show a temporary "Wow amazing!" bubble on clicks
 st.markdown('''
 <style>
@@ -2211,6 +2257,7 @@ st.markdown('''
 })();
 </script>
 ''', unsafe_allow_html=True)
+
 
 
 
