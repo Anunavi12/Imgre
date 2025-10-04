@@ -20,206 +20,112 @@ st.set_page_config(
 st.markdown("""
 <style>
 /* --- GOOGLE FONTS --- */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Poppins:wght@300;400;500;600;700;800;900&display=swap');
 
 /* --- HIDE DEFAULT STREAMLIT ELEMENTS --- */
 #MainMenu, footer, header { visibility: hidden; }
-.element-container:empty { display: none !important; }
-div[data-testid="stVerticalBlock"] > div:empty { display: none !important; }
 
 /* --- MODERN COLOR VARIABLES --- */
 :root {
-    --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     --accent-orange: #FF6B35;
     --accent-coral: #8b1e1e;
     --accent-purple: #764ba2;
-    --accent-teal: #2A9D8F;
-    --bg-dark: #0f0f23;
-    --bg-card: #1a1a2e;
-    --bg-light: #ffffff;
     --text-primary: #1a1a2e;
-    --text-secondary: #64748b;
     --text-light: #ffffff;
-    --border-color: rgba(255, 107, 53, 0.2);
-    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.08);
     --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.12);
     --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.16);
     --shadow-xl: 0 12px 48px rgba(0, 0, 0, 0.24);
 }
 
-/* --- SMOOTH ANIMATIONS --- */
+/* --- ANIMATIONS --- */
 @keyframes fadeInUp {
-    from { opacity: 0; transform: translateY(20px); }
+    from { opacity: 0; transform: translateY(30px); }
     to { opacity: 1; transform: translateY(0); }
 }
 
-@keyframes shimmer {
-    0% { background-position: -1000px 0; }
-    100% { background-position: 1000px 0; }
+@keyframes fadeInDown {
+    from { opacity: 0; transform: translateY(-30px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes gradientShift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
 }
 
 @keyframes pulse {
     0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.02); }
+    50% { transform: scale(1.05); }
 }
 
 @keyframes float {
     0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-8px); }
+    50% { transform: translateY(-12px); }
 }
 
-/* --- APP BACKGROUND --- */
-.main { 
-    font-family: 'Inter', sans-serif; 
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    background-attachment: fixed; 
-    min-height: 100vh; 
-    padding: 2rem 1rem;
+/* --- BACKGROUND --- */
+.stApp {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #667eea 100%) !important;
+    background-size: 200% 200% !important;
+    animation: gradientShift 15s ease infinite !important;
 }
-.stApp { background: transparent; }
 
-/* --- MAIN PAGE TITLE --- */
+/* --- MAIN TITLE --- */
 .page-title { 
     background: rgba(255, 255, 255, 0.98);
-    padding: 2rem 3rem; 
-    border-radius: 20px; 
+    backdrop-filter: blur(20px);
+    padding: 2.5rem 3rem; 
+    border-radius: 24px; 
     text-align: center; 
-    margin-bottom: 3rem; 
+    margin-bottom: 2rem; 
     box-shadow: var(--shadow-xl);
-    animation: fadeInUp 0.6s ease-out; 
-    border: 1px solid rgba(255, 255, 255, 0.3);
+    animation: fadeInDown 0.8s ease-out; 
+    border: 2px solid rgba(255, 107, 53, 0.2);
 }
 
 .page-title h1 { 
     margin: 0; 
-    font-weight: 800; 
+    font-weight: 900; 
     background: linear-gradient(135deg, var(--accent-orange), var(--accent-purple));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-    font-size: 2.5rem;
-    letter-spacing: -0.5px;
+    font-size: 2.8rem;
+    font-family: 'Poppins', sans-serif;
 }
 
-/* Mu-Sigma Logo - Fixed positioning with color protection */
-.musigma-logo {
-    position: fixed;
-    top: 14px;
-    right: 14px;
-    width: 80px;
-    height: 80px;
-    border-radius: 10px;
-    border: 2px solid rgba(255,255,255,0.9);
-    box-shadow: 0 8px 28px rgba(0,0,0,0.18);
-    z-index: 9999;
-    background: transparent !important;
-    opacity: 0.99;
-    transition: transform 0.15s ease, box-shadow 0.15s ease;
-    overflow: hidden;
-    /* Prevent any color inheritance */
-    background-color: transparent !important;
-    background-image: none !important;
-}
-
-.musigma-logo:hover { 
-    transform: translateY(-4px) scale(1.02); 
-    box-shadow: 0 12px 36px rgba(0,0,0,0.22);
-}
-
-@media (max-width: 640px) { 
-    .musigma-logo { 
-        display: none !important; 
-    } 
-}
-
-/* Logo image - complete color protection */
-.musigma-logo img {
-    width: 100% !important;
-    height: 100% !important;
-    object-fit: contain !important;
-    display: block !important;
-    /* Prevent any color filters or transformations */
-    filter: none !important;
-    mix-blend-mode: normal !important;
-    background: transparent !important;
-    /* Reset any inherited styles */
-    color: inherit !important;
-    background-color: transparent !important;
-    border: none !important;
-    outline: none !important;
-    /* Prevent any text rendering issues */
-    font-size: 0 !important;
-    line-height: 0 !important;
-}
-
-/* Link wrapper protection */
-.musigma-logo-link {
-    background: transparent !important;
-    text-decoration: none !important;
-    display: inline-block !important;
-}
-
-/* Force remove any gradient/color backgrounds */
-.musigma-logo,
-.musigma-logo *,
-.musigma-logo-link,
-.musigma-logo-link * {
-    background: transparent !important;
-    background-image: none !important;
-    background-color: transparent !important;
-    /* Remove any text color inheritance */
-    color: inherit !important;
-    -webkit-text-fill-color: inherit !important;
-}
-
-/* --- SECTION HEADINGS --- */
-h2, h3, h4, h5, h6,
-.stMarkdown h2, .stMarkdown h3, .stMarkdown h4, .stMarkdown h5, .stMarkdown h6,
-[data-testid="stMarkdownContainer"] h2,
-[data-testid="stMarkdownContainer"] h3,
-[data-testid="stMarkdownContainer"] h4,
-[data-testid="stMarkdownContainer"] h5,
-[data-testid="stMarkdownContainer"] h6 {
-    color: var(--text-primary) !important;
-    font-weight: 700 !important;
-    margin-top: 1.5rem !important;
-    margin-bottom: 1rem !important;
-    font-family: 'Space Grotesk', sans-serif !important;
-}
-
-/* --- SECTION TITLE BOXES --- */
+/* --- SECTION BOXES --- */
 .section-title-box { 
     background: rgba(255, 255, 255, 0.98); 
-    backdrop-filter: blur(16px);
-    border-left: 4px solid var(--accent-orange);
-    border-radius: 12px; 
-    padding: 1.25rem 1.75rem; 
-    margin: 2rem 0 1.5rem 0 !important; 
+    backdrop-filter: blur(20px);
+    border-left: 5px solid var(--accent-orange);
+    border-radius: 16px; 
+    padding: 1.5rem 2rem; 
+    margin: 1.5rem 0 1rem 0; 
     box-shadow: var(--shadow-md);
     animation: fadeInUp 0.6s ease-out; 
 }
 
-.section-title-box h2,
-.section-title-box h3,
-.section-title-box h4 {
+.section-title-box h3 {
     color: var(--text-primary) !important;
     margin: 0 !important;
     font-weight: 700 !important;
     font-size: 1.5rem !important;
-    font-family: 'Space Grotesk', sans-serif !important;
+    font-family: 'Poppins', sans-serif !important;
 }
 
 /* --- INFO CARDS --- */
 .info-card { 
     background: rgba(255, 255, 255, 0.98); 
-    backdrop-filter: blur(16px);
-    border: 1px solid var(--border-color);
-    border-radius: 16px; 
+    backdrop-filter: blur(20px);
+    border-radius: 20px; 
     padding: 2rem; 
     margin-bottom: 1.5rem; 
     box-shadow: var(--shadow-md);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    animation: fadeInUp 0.6s ease-out; 
+    transition: all 0.3s ease;
+    animation: fadeInUp 0.7s ease-out; 
+    border: 2px solid rgba(255, 107, 53, 0.1);
 }
 
 .info-card:hover { 
@@ -227,50 +133,18 @@ h2, h3, h4, h5, h6,
     box-shadow: var(--shadow-lg);
 }
 
-.info-card,
-.info-card *:not(h1):not(h2):not(h3):not(h4):not(h5):not(h6) { 
-    color: var(--text-primary) !important; 
-}
-
-.info-card p, .info-card li, .info-card span {
-    color: var(--text-primary) !important; 
-    line-height: 1.7;
-    font-size: 1rem;
-}
-
-.info-card h3, .info-card h4 {
-    color: var(--accent-orange) !important;
-    font-weight: 700 !important;
-    margin-bottom: 1rem !important;
-}
-
-.info-card ul, .info-card ol { 
-    margin-left: 1.5rem; 
-    padding-left: 0.5rem; 
-}
-
-.info-card li { 
-    margin-bottom: 0.5rem; 
+.info-card * {
+    color: var(--text-primary) !important;
 }
 
 /* --- PROBLEM DISPLAY --- */
 .problem-display { 
-    background: rgba(255, 255, 255, 0.98) !important; 
-    backdrop-filter: blur(16px);
-    border: 1px solid var(--border-color);
-    border-radius: 16px !important; 
-    padding: 2rem !important; 
-    margin-bottom: 2rem; 
-    box-shadow: var(--shadow-md);
-    animation: fadeInUp 0.6s ease-out;
-}
-
-.problem-display h4 { 
-    color: var(--accent-orange) !important; 
-    margin-top: 0; 
-    font-weight: 700; 
-    font-size: 1.25rem; 
-    margin-bottom: 1rem;
+    background: rgba(255, 255, 255, 0.98); 
+    border: 2px solid var(--accent-orange);
+    border-radius: 20px; 
+    padding: 2rem; 
+    margin-bottom: 1.5rem; 
+    box-shadow: var(--shadow-lg);
 }
 
 .problem-display p { 
@@ -280,39 +154,123 @@ h2, h3, h4, h5, h6,
     margin: 0;
 }
 
-/* --- INPUT CARD --- */
-.input-card { 
-    background: rgba(255, 255, 255, 0.12); 
-    backdrop-filter: blur(16px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 16px; 
-    padding: 2rem; 
-    margin-bottom: 2rem; 
-    box-shadow: var(--shadow-md);
-    animation: fadeInUp 0.6s ease-out; 
+/* --- SCORE BADGES --- */
+.score-badge { 
+    background: linear-gradient(135deg, var(--accent-orange), var(--accent-coral)); 
+    padding: 2.5rem; 
+    border-radius: 24px; 
+    text-align: center; 
+    color: var(--text-light); 
+    box-shadow: var(--shadow-xl);
+    animation: fadeInUp 0.8s ease-out, pulse 3s ease-in-out infinite; 
+    min-height: 180px; 
+    display: flex; 
+    flex-direction: column; 
+    align-items: center; 
+    justify-content: center; 
 }
 
-.input-card h3 { 
+.score-badge * { 
     color: var(--text-light) !important; 
-    margin-top: 0; 
-    font-weight: 700;
 }
 
-.input-card p, .input-card label { 
-    color: rgba(255, 255, 255, 0.9) !important; 
+/* --- HARDNESS BADGES --- */
+.hardness-badge-hard { 
+    background: linear-gradient(135deg, #E74C3C, #C0392B); 
+    color: var(--text-light) !important;
+    padding: 2.5rem;
+    border-radius: 24px;
+    font-size: 1.8rem;
+    font-weight: 800;
+    text-align: center;
+    min-height: 180px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    animation: fadeInUp 0.8s ease-out, pulse 3s ease-in-out infinite;
+    box-shadow: var(--shadow-xl);
+}
+
+.hardness-badge-moderate { 
+    background: linear-gradient(135deg, #F39C12, #E67E22); 
+    color: var(--text-light) !important;
+    padding: 2.5rem;
+    border-radius: 24px;
+    font-size: 1.8rem;
+    font-weight: 800;
+    text-align: center;
+    min-height: 180px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    animation: fadeInUp 0.8s ease-out, pulse 3s ease-in-out infinite;
+    box-shadow: var(--shadow-xl);
+}
+
+.hardness-badge-easy { 
+    background: linear-gradient(135deg, #27AE60, #229954); 
+    color: var(--text-light) !important;
+    padding: 2.5rem;
+    border-radius: 24px;
+    font-size: 1.8rem;
+    font-weight: 800;
+    text-align: center;
+    min-height: 180px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    animation: fadeInUp 0.8s ease-out, pulse 3s ease-in-out infinite;
+    box-shadow: var(--shadow-xl);
+}
+
+/* --- DIMENSION BOXES --- */
+.dimension-box, .dimension-display-box { 
+    background: linear-gradient(135deg, var(--accent-orange), var(--accent-coral)); 
+    color: var(--text-light) !important; 
+    padding: 2rem; 
+    border-radius: 20px; 
+    text-align: center; 
+    box-shadow: var(--shadow-lg);
+    min-height: 150px; 
+    margin-bottom: 1.5rem; 
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.dimension-box:hover, .dimension-display-box:hover { 
+    transform: translateY(-6px) scale(1.03); 
+    box-shadow: var(--shadow-xl);
+}
+
+.dimension-score { 
+    font-size: 3rem; 
+    font-weight: 900; 
+    margin: 0.5rem 0; 
+    color: var(--text-light) !important; 
+    font-family: 'Poppins', sans-serif;
+}
+
+.dimension-label { 
+    font-size: 1.1rem; 
+    font-weight: 600; 
+    color: var(--text-light) !important; 
+    text-transform: uppercase; 
+    letter-spacing: 1px; 
+    font-family: 'Poppins', sans-serif;
 }
 
 /* --- Q&A BOXES --- */
 .qa-box { 
     background: rgba(255, 255, 255, 0.98); 
-    backdrop-filter: blur(16px);
-    border: 1px solid var(--border-color);
-    border-radius: 16px; 
-    padding: 1.75rem; 
+    border-radius: 20px; 
+    padding: 2rem; 
     margin-bottom: 1.5rem; 
     box-shadow: var(--shadow-md);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    animation: fadeInUp 0.6s ease-out; 
+    transition: all 0.3s ease;
+    border: 2px solid rgba(255, 107, 53, 0.1);
 }
 
 .qa-box:hover { 
@@ -325,299 +283,27 @@ h2, h3, h4, h5, h6,
     font-size: 1.1rem; 
     color: var(--accent-orange) !important; 
     margin-bottom: 1rem; 
-    line-height: 1.6; 
-    font-family: 'Space Grotesk', sans-serif;
+    font-family: 'Poppins', sans-serif;
 }
 
 .qa-answer { 
     font-size: 1rem; 
     line-height: 1.7; 
     color: var(--text-primary) !important; 
-    white-space: pre-wrap; 
 }
 
-.qa-answer p, .qa-answer li, .qa-answer span { 
-    color: var(--text-primary) !important; 
-}
-
-.qa-answer ul, .qa-answer ol { 
-    margin-left: 1.5rem; 
-    padding-left: 0.5rem; 
-}
-
-.qa-answer li { 
-    margin-bottom: 0.5rem; 
-}
-
-/* --- SCORE BADGES --- */
-.score-badge { 
-    background: linear-gradient(135deg, var(--accent-orange), var(--accent-coral)); 
-    padding: 2.5rem; 
-    border-radius: 20px; 
-    text-align: center; 
-    color: var(--text-light); 
-    box-shadow: var(--shadow-lg);
-    animation: fadeInUp 0.6s ease-out; 
-    min-height: 180px; 
-    display: flex; 
-    flex-direction: column; 
-    align-items: center; 
-    justify-content: center; 
-    border: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-.score-badge * { 
-    color: var(--text-light) !important; 
-}
-
-/* --- HARDNESS BADGES --- */
-.hardness-badge-hard, 
-.hardness-badge-moderate, 
-.hardness-badge-easy { 
-    color: var(--text-light) !important; 
-    padding: 2.5rem; 
-    border-radius: 20px; 
-    font-size: 1.8rem; 
-    font-weight: 800; 
-    text-align: center; 
-    min-height: 180px; 
-    display: flex; 
-    flex-direction: column;
-    align-items: center; 
-    justify-content: center; 
-    animation: fadeInUp 0.6s ease-out; 
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    box-shadow: var(--shadow-lg);
-}
-
-.hardness-badge-hard { 
-    background: linear-gradient(135deg, #E74C3C, #C0392B); 
-}
-
-.hardness-badge-moderate { 
-    background: linear-gradient(135deg, #F39C12, #E67E22); 
-}
-
-.hardness-badge-easy { 
-    background: linear-gradient(135deg, #27AE60, #229954); 
-}
-
-/* --- DIMENSION BOXES --- */
-.dimension-box, 
-.dimension-display-box { 
-    color: var(--text-light) !important; 
-    padding: 2rem; 
-    border-radius: 16px; 
-    text-align: center; 
-    box-shadow: var(--shadow-md);
-    min-height: 150px; 
-    margin-bottom: 1.5rem; 
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    animation: fadeInUp 0.6s ease-out; 
-    border: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-.dimension-box { 
-    background: linear-gradient(135deg, var(--accent-orange), var(--accent-coral)); 
-    cursor: pointer;
-}
-
-.dimension-box:hover { 
-    transform: translateY(-6px) scale(1.02); 
-    box-shadow: var(--shadow-xl);
-}
-
-.dimension-display-box { 
-    background: linear-gradient(135deg, var(--accent-orange), var(--accent-coral)); 
-}
-
-.dimension-display-box:hover { 
-    transform: translateY(-4px); 
-    box-shadow: var(--shadow-lg);
-}
-
-.dimension-score { 
-    font-size: 3rem; 
-    font-weight: 900; 
-    margin: 0.75rem 0; 
-    color: var(--text-light) !important; 
-    font-family: 'Space Grotesk', sans-serif;
-}
-
-.dimension-label { 
-    font-size: 1.15rem; 
-    font-weight: 600; 
-    color: var(--text-light) !important; 
-    opacity: 0.95; 
-    text-transform: uppercase; 
-    letter-spacing: 1px; 
-    font-family: 'Space Grotesk', sans-serif;
-}
-
-/* --- VOCABULARY DISPLAY --- */
-.vocab-display { 
-    background: rgba(255, 255, 255, 0.98) !important; 
-    backdrop-filter: blur(16px);
-    border: 1px solid var(--border-color);
-    border-radius: 16px; 
-    padding: 1.5rem; 
-    line-height: 1.5 !important; 
-    margin-top: 1rem;
-    color: var(--text-primary) !important;
-    font-size: 0.95rem;
-    max-height: 500px;
-    overflow-y: auto;
-    box-shadow: var(--shadow-md);
-}
-
-.vocab-display * { 
-    color: var(--text-primary) !important; 
-    line-height: 1.5 !important;
-}
-
-.vocab-display strong {
-    color: var(--accent-orange) !important;
-    font-weight: 700 !important;
-}
-
-.vocab-item {
-    margin-bottom: 0.75rem !important;
-    padding-bottom: 0.75rem !important;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
-}
-
-.vocab-item:last-child {
-    border-bottom: none;
-}
-
-/* --- DIMENSION CLICK TEXT --- */
-.dimension-click-text {
-    color: rgba(255, 255, 255, 0.95) !important;
-    font-size: 1rem !important;
-    font-weight: 500 !important;
-    text-align: center;
-    margin-bottom: 2rem !important;
-    padding: 1rem;
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 8px;
-    backdrop-filter: blur(8px);
-}
-
-/* --- INFO ICONS --- */
-.info-icon { 
-    font-size: 3rem; 
-    display: inline-block; 
-    margin-right: 1rem; 
-    animation: float 3s ease-in-out infinite; 
-    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2)); 
-}
-
-/* --- STREAMLIT SELECT BOXES --- */
-.stSelectbox > div > div { 
-    background-color: rgba(255, 255, 255, 0.98) !important; 
-    border: 1px solid var(--border-color) !important; 
-    border-radius: 12px !important; 
-    padding: 0.75rem 1rem !important; 
-    min-height: 56px !important; 
-    display: flex; 
-    align-items: center; 
-    box-shadow: var(--shadow-sm);
-    transition: all 0.3s ease; 
-}
-
-.stSelectbox > div > div:hover { 
-    border-color: var(--accent-orange) !important; 
-    box-shadow: var(--shadow-md);
-    transform: translateY(-2px); 
-}
-
-.stSelectbox [data-baseweb="select"] { 
-    background-color: transparent !important; 
-    color: var(--text-primary) !important; 
-    line-height: 1.5 !important; 
-    min-height: 50px !important; 
-}
-
-.stSelectbox [data-baseweb="select"] *, 
-.stSelectbox [data-baseweb="select"] div, 
-.stSelectbox [data-baseweb="select"] span, 
-.stSelectbox [data-baseweb="select"] input { 
-    color: var(--text-primary) !important; 
-    background-color: transparent !important; 
-    font-size: 1rem !important; 
-    font-weight: 500 !important; 
-}
-
-.stSelectbox [data-baseweb="select"] svg { 
-    fill: var(--accent-orange) !important; 
-}
-
-[data-baseweb="popover"] { 
-    background-color: var(--bg-light) !important; 
-}
-
-ul[role="listbox"] { 
-    background-color: var(--bg-light) !important; 
-    border: 1px solid var(--border-color) !important; 
-    border-radius: 12px !important; 
-    max-height: 280px !important; 
-    overflow-y: auto !important; 
-    box-shadow: var(--shadow-lg);
-}
-
-li[role="option"] { 
-    color: var(--text-primary) !important; 
-    background-color: var(--bg-light) !important; 
-    padding: 12px 16px !important; 
-    font-size: 1rem !important; 
-    line-height: 1.5 !important; 
-    transition: all 0.2s ease; 
-}
-
-li[role="option"]:hover { 
-    background-color: rgba(255, 107, 53, 0.08) !important; 
-    color: var(--accent-orange) !important; 
-    transform: translateX(4px); 
-}
-
-li[role="option"][aria-selected="true"] { 
-    background-color: rgba(255, 107, 53, 0.12) !important; 
-    color: var(--accent-orange) !important; 
-    font-weight: 600 !important; 
-}
-
-/* --- STREAMLIT TEXT AREAS & INPUTS --- */
-.stTextArea textarea, 
-.stTextInput input { 
-    background: rgba(255, 255, 255, 0.98) !important; 
-    border: 1px solid var(--border-color) !important; 
-    border-radius: 12px !important; 
-    color: var(--text-primary) !important; 
-    font-size: 1rem !important; 
-    box-shadow: var(--shadow-sm);
-    transition: all 0.3s ease; 
-    padding: 0.875rem !important; 
-}
-
-.stTextArea textarea:focus, 
-.stTextInput input:focus { 
-    border-color: var(--accent-orange) !important; 
-    box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.1) !important;
-    outline: none !important;
-}
-
-/* --- STREAMLIT BUTTONS --- */
+/* --- BUTTONS --- */
 .stButton > button { 
     background: linear-gradient(135deg, var(--accent-orange), var(--accent-coral)); 
     color: #ffffff !important; 
     border: none; 
-    border-radius: 12px; 
-    padding: 0.875rem 2rem; 
-    font-weight: 600; 
-    font-size: 1rem; 
+    border-radius: 16px; 
+    padding: 1rem 2rem; 
+    font-weight: 700; 
+    font-size: 1.05rem; 
     box-shadow: var(--shadow-md);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    cursor: pointer; 
+    transition: all 0.3s ease;
+    font-family: 'Poppins', sans-serif;
 }
 
 .stButton > button:hover { 
@@ -625,42 +311,105 @@ li[role="option"][aria-selected="true"] {
     box-shadow: var(--shadow-lg);
 }
 
-.stButton > button:active { 
-    transform: translateY(-1px); 
+/* --- SELECT BOXES --- */
+.stSelectbox > div > div { 
+    background-color: rgba(255, 255, 255, 0.98) !important; 
+    border: 2px solid rgba(255, 107, 53, 0.2) !important; 
+    border-radius: 16px !important; 
+    padding: 0.75rem 1rem !important; 
+    box-shadow: var(--shadow-md);
 }
 
-/* --- EXPANDER --- */
-.streamlit-expanderHeader { 
-    background: rgba(255, 255, 255, 0.12) !important; 
-    border-radius: 12px !important; 
-    color: var(--text-light) !important; 
-    font-weight: 600 !important; 
+.stSelectbox > div > div:hover { 
+    border-color: var(--accent-orange) !important; 
+    transform: translateY(-2px); 
+}
+
+/* --- TEXT AREAS --- */
+.stTextArea textarea { 
+    background: rgba(255, 255, 255, 0.98) !important; 
+    border: 2px solid rgba(255, 107, 53, 0.2) !important; 
+    border-radius: 16px !important; 
+    color: var(--text-primary) !important; 
     padding: 1rem !important; 
-    transition: all 0.3s ease;
 }
 
-.streamlit-expanderHeader:hover { 
-    background: rgba(255, 255, 255, 0.18) !important; 
+.stTextArea textarea:focus { 
+    border-color: var(--accent-orange) !important; 
+    box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.1) !important;
 }
 
-.streamlit-expanderContent { 
-    background: rgba(255, 255, 255, 0.08) !important; 
-    border-radius: 12px !important; 
-    padding: 1.5rem !important; 
-    margin-top: 0.5rem;
+/* --- LOGO --- */
+.musigma-logo {
+    position: fixed;
+    top: 14px;
+    right: 14px;
+    width: 80px;
+    height: 80px;
+    border-radius: 16px;
+    border: 2px solid rgba(255,255,255,0.9);
+    box-shadow: 0 8px 28px rgba(0,0,0,0.2);
+    z-index: 9999;
+    background: white;
+    animation: fadeInDown 0.6s ease-out, float 4s ease-in-out infinite;
+    transition: transform 0.3s ease;
+}
+
+.musigma-logo:hover { 
+    transform: translateY(-6px) scale(1.05); 
+}
+
+.musigma-logo img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    padding: 8px;
+}
+
+@media (max-width: 640px) { 
+    .musigma-logo { display: none; } 
+}
+
+/* --- VOCABULARY DISPLAY --- */
+.vocab-display { 
+    background: rgba(255, 255, 255, 0.98); 
+    border: 2px solid rgba(255, 107, 53, 0.2);
+    border-radius: 20px; 
+    padding: 2rem; 
+    margin-top: 1rem;
+    max-height: 500px;
+    overflow-y: auto;
+    box-shadow: var(--shadow-md);
+}
+
+.vocab-display * {
+    color: var(--text-primary) !important;
+}
+
+/* --- DIMENSION CLICK TEXT --- */
+.dimension-click-text {
+    color: rgba(255, 255, 255, 0.95) !important;
+    font-size: 1.05rem;
+    font-weight: 500;
+    text-align: center;
+    margin-bottom: 2rem;
+    padding: 1.25rem;
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 12px;
+    backdrop-filter: blur(12px);
+    border: 2px solid rgba(255, 255, 255, 0.2);
 }
 
 /* --- PROGRESS BAR --- */
 .stProgress > div > div { 
-    background: linear-gradient(90deg, var(--accent-orange), var(--accent-coral)) !important; 
+    background: linear-gradient(90deg, var(--accent-orange), var(--accent-purple)) !important; 
     border-radius: 10px; 
     height: 8px !important;
 }
 
-/* --- SCROLLBAR STYLING --- */
+/* --- SCROLLBAR --- */
 ::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
+    width: 10px;
 }
 
 ::-webkit-scrollbar-track {
@@ -669,24 +418,22 @@ li[role="option"][aria-selected="true"] {
 }
 
 ::-webkit-scrollbar-thumb {
-    background: var(--accent-orange);
+    background: linear-gradient(180deg, var(--accent-orange), var(--accent-coral));
     border-radius: 10px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    background: var(--accent-coral);
+    background: linear-gradient(180deg, var(--accent-coral), var(--accent-orange));
 }
 </style>
 """, unsafe_allow_html=True)
 
-# Small CSS tweak for heading icons so emoji/icons keep a distinct accent color
-st.markdown("""
-<style>
-    .heading-icon { color: var(--accent-orange) !important; margin-right: 0.5rem; font-size: 1.05em; vertical-align: middle; }
-    .info-card .heading-icon { margin-right: 0.6rem; }
-</style>
-""", unsafe_allow_html=True)
-
+# Logo
+st.markdown('''
+<div class="musigma-logo">
+    <img src="https://yt3.googleusercontent.com/ytc/AIdro_k-7HkbByPWjKpVPO3LCF8XYlKuQuwROO0vf3zo1cqgoaE=s900-c-k-c0x00ffffff-no-rj" alt="Mu-Sigma">
+</div>
+''', unsafe_allow_html=True)
 # -----------------------------
 # Config - Data & Auth
 # -----------------------------
@@ -1429,17 +1176,42 @@ init_session_state()
 
 def reset_app_state():
     """Reset session state to defaults for a new analysis."""
-    keys_to_keep = [
-        # Keep UI defaults but reset user inputs/outputs
-        'current_page', 'account', 'industry'
-    ]
-    preserved = {k: st.session_state.get(k) for k in keys_to_keep}
+    # Preserve only the current page so the UI doesn't unexpectedly navigate away
+    preserved_page = st.session_state.get('current_page', 'page1')
+
+    # Clear everything and reinitialize defaults
     st.session_state.clear()
     init_session_state()
-    for k, v in preserved.items():
-        st.session_state[k] = v
+
+    # Restore page and reset user-visible inputs to defaults
+    st.session_state.current_page = preserved_page
+    st.session_state.account = 'Select Account'
+    st.session_state.industry = 'Select Industry'
+    st.session_state.problem_text = ''
+    st.session_state.account_input = ''
+
+    # Clear analysis outputs and derived fields
+    st.session_state.outputs = {}
+    st.session_state.analysis_complete = False
+    st.session_state.show_vocabulary = False
+    st.session_state.question_scores = {}
+    st.session_state.dimension_scores = {
+        'Volatility': 0.0,
+        'Ambiguity': 0.0,
+        'Interconnectedness': 0.0,
+        'Uncertainty': 0.0
+    }
+    st.session_state.overall_score = 0.0
+    st.session_state.hardness_level = None
+    st.session_state.summary = ''
+    st.session_state.current_system_full = ''
+    st.session_state.input_text = ''
+    st.session_state.output_text = ''
+    st.session_state.pain_points_text = ''
+    st.session_state.hardness_summary_text = ''
+
     st.success("🔄 Application state reset. You can start a new analysis.")
-    # Use a safe rerun that works across Streamlit versions
+    # Trigger a rerun so the UI reflects the cleared state immediately
     safe_rerun()
 
 
@@ -1485,7 +1257,7 @@ def safe_rerun():
 # PAGE 1: Business Problem Input & Analysis
 # -----------------------------
 if st.session_state.current_page == "page1":
-    st.markdown('<div class="page-title"><h1>🧠 Business Problem Level Classifier</h1></div>', unsafe_allow_html=True)
+    st.markdown('<div class="page-title"><h1>Business Problem Level Classifier</h1></div>', unsafe_allow_html=True)
     
     # Account & Industry Selection
     st.markdown('<div class="section-title-box"><h3>🏢 Account & Industry Selection</h3></div>', unsafe_allow_html=True)
@@ -1753,14 +1525,14 @@ if st.session_state.current_page == "page1":
         
         col1, col2 = st.columns(2)
         dimensions = ["Volatility", "Ambiguity", "Interconnectedness", "Uncertainty"]
-        dimension_icons = ["⚡", "❓", "🔗", "🎲"]
-        
+        # Icons removed to avoid colored emoji rendering; using neutral placeholders instead
+        dimension_icons = ["", "", "", ""]
         for i, dimension in enumerate(dimensions):
             with col1 if i < 2 else col2:
                 score = st.session_state.dimension_scores.get(dimension, 0.0)
                 st.markdown(f'''
                 <div class="dimension-display-box">
-                    <div class="dimension-label">{dimension_icons[i]} {dimension}</div>
+                    <div class="dimension-label"><span class="dim-icon">{dimension_icons[i]}</span> {dimension}</div>
                     <div class="dimension-score">{score:.2f}/5</div>
                 </div>
                 ''', unsafe_allow_html=True)
@@ -1844,19 +1616,20 @@ if st.session_state.current_page == "page2":
     st.markdown('<div class="dimension-click-text">Click dimension boxes to view detailed analysis</div>', unsafe_allow_html=True)
 
     col1, col2 = st.columns(2)
+    col1, col2 = st.columns(2)
     dimensions = ["Volatility", "Ambiguity", "Interconnectedness", "Uncertainty"]
-    dimension_icons = ["⚡", "❓", "🔗", "🎲"]
+    # Icons removed to avoid colored emoji rendering; using neutral placeholders instead
+    dimension_icons = ["", "", "", ""]
 
     for i, dimension in enumerate(dimensions):
         with col1 if i < 2 else col2:
             score = st.session_state.dimension_scores.get(dimension, 0.0)
             st.markdown(f'''
             <div class="dimension-box">
-                <div class="dimension-label">{dimension_icons[i]} {dimension}</div>
+                <div class="dimension-label"><span class="dim-icon">{dimension_icons[i]}</span> {dimension}</div>
                 <div class="dimension-score">{score:.2f}/5</div>
             </div>
             ''', unsafe_allow_html=True)
-
             if st.button(f"View {dimension} Details →", key=f"dim_{dimension}", use_container_width=True):
                 st.session_state.current_page = f"dimension_{dimension.lower()}"
                 st.rerun()
@@ -1873,10 +1646,10 @@ if st.session_state.current_page == "page2":
 elif st.session_state.current_page.startswith("dimension_"):
     dimension_name = st.session_state.current_page.replace("dimension_", "").title()
     dimension_icons = {
-        "Volatility": "⚡",
-        "Ambiguity": "❓",
-        "Interconnectedness": "🔗",
-        "Uncertainty": "🎲"
+        "Volatility": "",
+        "Ambiguity": "",
+        "Interconnectedness": "",
+        "Uncertainty": ""
     }
     
     st.markdown(f'<div class="page-title"><h1>{dimension_icons.get(dimension_name, "")} {dimension_name} Analysis</h1></div>', unsafe_allow_html=True)
@@ -1944,7 +1717,7 @@ elif st.session_state.current_page.startswith("dimension_"):
 elif st.session_state.current_page == "hardness_summary":
     st.markdown('''
     <div class="page-title">
-        <h1>📊 Hardness Summary Analysis</h1>
+        <h1>Hardness Summary Analysis</h1>
     </div>
     ''', unsafe_allow_html=True)
     
@@ -2227,8 +2000,3 @@ st.markdown('''
 })();
 </script>
 ''', unsafe_allow_html=True)
-
-
-
-
-
