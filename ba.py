@@ -31,7 +31,7 @@ div[data-testid="stVerticalBlock"] > div:empty { display: none !important; }
 :root {
     --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     --accent-orange: #FF6B35;
-    --accent-coral: #FF8C69;
+    --accent-coral: #8b1e1e;
     --accent-purple: #764ba2;
     --accent-teal: #2A9D8F;
     --bg-dark: #0f0f23;
@@ -100,6 +100,26 @@ div[data-testid="stVerticalBlock"] > div:empty { display: none !important; }
     font-size: 2.5rem;
     letter-spacing: -0.5px;
 }
+
+/* Musigma logo overlay - place a small logo in top-right corner */
+.musigma-logo {
+    position: fixed;
+    top: 14px;
+    right: 14px;
+    width: 80px;
+    height: 80px;
+    border-radius: 10px;
+    border: 2px solid rgba(255,255,255,0.9);
+    box-shadow: 0 8px 28px rgba(0,0,0,0.18);
+    z-index: 9999;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    opacity: 0.99;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.musigma-logo:hover { transform: translateY(-4px) scale(1.02); box-shadow: 0 12px 36px rgba(0,0,0,0.22); }
+@media (max-width: 640px) { .musigma-logo { display: none !important; } }
 
 /* --- SECTION HEADINGS --- */
 h2, h3, h4, h5, h6,
@@ -538,7 +558,7 @@ li[role="option"][aria-selected="true"] {
 /* --- STREAMLIT BUTTONS --- */
 .stButton > button { 
     background: linear-gradient(135deg, var(--accent-orange), var(--accent-coral)); 
-    color: var(--text-light) !important; 
+    color: #ffffff !important; 
     border: none; 
     border-radius: 12px; 
     padding: 0.875rem 2rem; 
@@ -2029,4 +2049,60 @@ elif st.session_state.current_page == "hardness_summary":
         except Exception:
             st.markdown("<div class='info-card'>Unable to create download at this time.</div>", unsafe_allow_html=True)
 
+import base64
+logo_path = os.path.join(os.path.dirname(__file__), 'musigma_logo.png')
+logo_html = ''
+if os.path.exists(logo_path):
+    with open(logo_path, 'rb') as f:
+        data = f.read()
+    b64 = base64.b64encode(data).decode('utf-8')
+    logo_html = f"<a href='https://mu-sigma.com' target='_blank' rel='noopener'><div class='musigma-logo' style=\"background-image: url('data:image/png;base64,{b64}');\"></div></a>"
+else:
+    # Fallback: render a small textual badge so there's visual indication even if the file is missing
+    logo_html = "<a href='https://mu-sigma.com' target='_blank' rel='noopener'><div class='musigma-logo' style='display:flex;align-items:center;justify-content:center;background:#8b1e1e;color:#fff;font-weight:700;font-family:sans-serif;'>μσ</div></a>"
+
+st.markdown(logo_html, unsafe_allow_html=True)
+
+# Inject JS/CSS: hide logo when user scrolls down, animate on load, and show a temporary "Wow amazing!" bubble on clicks
+st.markdown('''
+<style>
+@keyframes logoPop { 0% { transform: translateY(-12px) scale(0.6); opacity:0 } 60% { transform: translateY(4px) scale(1.05); opacity:1 } 100% { transform: translateY(0) scale(1); opacity:1 } }
+@keyframes wowFloat { 0% { opacity: 1; transform: translateY(0) scale(1); } 100% { opacity: 0; transform: translateY(-24px) scale(1.06); } }
+.wow-bubble { position: fixed; pointer-events: none; background: #8b1e1e; color: #fff; padding: 8px 12px; border-radius: 20px; font-weight:700; font-family: Inter, sans-serif; box-shadow: 0 8px 20px rgba(0,0,0,0.18); z-index: 99999; animation: wowFloat 1.1s ease forwards; transform-origin: center; }
+</style>
+<script>
+(function(){
+    try{
+        const logo = document.querySelector('.musigma-logo');
+        if(logo){
+            // initial pop animation
+            logo.style.animation = 'logoPop 0.6s ease forwards';
+            logo.style.transition = 'opacity 0.18s ease, transform 0.18s ease';
+            // ensure visible when at top
+            if(window.scrollY > 50){ logo.style.opacity = '0'; logo.style.pointerEvents='none'; }
+            window.addEventListener('scroll', function(){
+                if(window.scrollY > 50){ logo.style.opacity = '0'; logo.style.pointerEvents='none'; logo.style.transform='translateY(-10px) scale(0.98)'; }
+                else { logo.style.opacity = '1'; logo.style.pointerEvents='auto'; logo.style.transform='translateY(0) scale(1)'; }
+            }, {passive:true});
+        }
+
+        // Click-triggered bubble
+        document.addEventListener('click', function(e){
+            try{
+                const bubble = document.createElement('div');
+                bubble.className = 'wow-bubble';
+                bubble.textContent = 'Wow amazing!';
+                document.body.appendChild(bubble);
+                // position with some offset so it doesn't sit directly under cursor
+                const x = Math.max(8, Math.min(window.innerWidth - 120, e.clientX - 50));
+                const y = Math.max(8, Math.min(window.innerHeight - 40, e.clientY - 30));
+                bubble.style.left = x + 'px';
+                bubble.style.top = y + 'px';
+                setTimeout(function(){ if(bubble && bubble.parentNode){ bubble.parentNode.removeChild(bubble); } }, 1200);
+            } catch(err){ console.error(err); }
+        }, false);
+    } catch(e){ console.error(e); }
+})();
+</script>
+''', unsafe_allow_html=True)
 
