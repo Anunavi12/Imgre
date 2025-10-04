@@ -4,6 +4,7 @@ import random
 import hashlib
 from datetime import datetime, timedelta
 from io import BytesIO
+from fpdf import FPDF
 import unicodedata
 import pandas as pd
 
@@ -608,6 +609,14 @@ li[role="option"][aria-selected="true"] {
 </style>
 """, unsafe_allow_html=True)
 
+# Small CSS tweak for heading icons so emoji/icons keep a distinct accent color
+st.markdown("""
+<style>
+    .heading-icon { color: var(--accent-orange) !important; margin-right: 0.5rem; font-size: 1.05em; vertical-align: middle; }
+    .info-card .heading-icon { margin-right: 0.6rem; }
+</style>
+""", unsafe_allow_html=True)
+
 # -----------------------------
 # Config - Data & Auth
 # -----------------------------
@@ -618,7 +627,6 @@ HEADERS_BASE = {"Content-Type": "application/json"}
 # EXPANDED ACCOUNTS with Industry Mapping
 ACCOUNT_INDUSTRY_MAP = {
     "Select Account": "Select Industry",
-
     # Pharmaceutical
     "Abbvie": "Pharma",
     "BMS": "Pharma",
@@ -627,7 +635,6 @@ ACCOUNT_INDUSTRY_MAP = {
     "Novartis": "Pharma",
     "Merck": "Pharma",
     "Roche": "Pharma",
-
     # Technology
     "Microsoft": "Technology",
     "DELL": "Technology",
@@ -636,7 +643,6 @@ ACCOUNT_INDUSTRY_MAP = {
     "SAP": "Technology",
     "Salesforce": "Technology",
     "Adobe": "Technology",
-
     # Retail
     "Walmart": "Retail",
     "Target": "Retail",
@@ -645,7 +651,6 @@ ACCOUNT_INDUSTRY_MAP = {
     "Coles": "Retail",
     "Tesco": "Retail",
     "Carrefour": "Retail",
-
     # Airlines
     "Southwest Airlines": "Airlines",
     "Delta Airlines": "Airlines",
@@ -653,7 +658,6 @@ ACCOUNT_INDUSTRY_MAP = {
     "American Airlines": "Airlines",
     "Emirates": "Airlines",
     "Lufthansa": "Airlines",
-
     # Consumer Goods
     "Nike": "Consumer Goods",
     "Adidas": "Consumer Goods",
@@ -661,14 +665,12 @@ ACCOUNT_INDUSTRY_MAP = {
     "Procter & Gamble": "Consumer Goods",
     "Coca-Cola": "Consumer Goods",
     "PepsiCo": "Consumer Goods",
-
     # Energy
     "Chevron": "Energy",
     "ExxonMobil": "Energy",
     "Shell": "Energy",
     "BP": "Energy",
     "TotalEnergies": "Energy",
-
     # Finance
     "JPMorgan Chase": "Finance",
     "Bank of America": "Finance",
@@ -676,92 +678,49 @@ ACCOUNT_INDUSTRY_MAP = {
     "Goldman Sachs": "Finance",
     "Morgan Stanley": "Finance",
     "Citigroup": "Finance",
-
     # Healthcare
     "UnitedHealth": "Healthcare",
     "CVS Health": "Healthcare",
     "Anthem": "Healthcare",
     "Humana": "Healthcare",
     "Kaiser Permanente": "Healthcare",
-
     # Logistics
     "FedEx": "Logistics",
     "UPS": "Logistics",
     "DHL": "Logistics",
     "Maersk": "Logistics",
     "Amazon Logistics": "Logistics",
-
     # E-commerce
     "Amazon": "E-commerce",
     "Alibaba": "E-commerce",
     "eBay": "E-commerce",
     "Shopify": "E-commerce",
     "Flipkart": "E-commerce",
-
     # Automotive
     "Tesla": "Automotive",
     "Ford": "Automotive",
     "General Motors": "Automotive",
     "Toyota": "Automotive",
     "Volkswagen": "Automotive",
-
     # Hospitality
     "Marriott": "Hospitality",
     "Hilton": "Hospitality",
     "Hyatt": "Hospitality",
     "Airbnb": "Hospitality",
-
     # Education
-    "Skill Development": "Government",
+    "Skill Development": "Education",
     "Coursera": "Education",
     "Udemy": "Education",
     "Khan Academy": "Education",
-
-    # Defence
-    "Indian Army": "Defence",
-    "Indian Navy": "Defence",
-    "Indian Air Force": "Defence",
-    "DRDO": "Defence",
-    "HAL": "Defence",
-    "ISRO": "Defence",
-
-    # Marketing
-    "SEO": "Marketing",
-    "Social Media Ads": "Marketing",
-    "Google Analytics": "Marketing",
-    "Content Marketing": "Marketing",
-    "Email Campaigns": "Marketing",
-    "Brand Management": "Marketing",
-
-    # Manufacturing
-    "Automobile": "Manufacturing",
-    "Textiles": "Manufacturing",
-    "Electronics": "Manufacturing",
-    "Steel": "Manufacturing",
-    "Cement": "Manufacturing",
-    "Pharmaceuticals": "Manufacturing",
-    "FMCG": "Manufacturing",
-
-    # IoT
-    "Siemens": "IoT",
-    "Bosch": "IoT",
-    "Honeywell": "IoT",
-    "GE Digital": "IoT",
-    "PTC": "IoT",
-    "Schneider Electric": "IoT",
-
-    # Other / Miscellaneous
-    "BLR Airport": "Airlines",
-    "THD": "Retail",
-    "Tmobile": "Telecomunication",
+    # Other
+    "BLR Airport": "Other",
+    "THD": "Other",
+    "Tmobile": "Other",
     "Mu Labs": "Other",
-    "SpaceX": "Other",
-    "OpenAI": "Other",
 }
 
 ACCOUNTS = sorted(list(ACCOUNT_INDUSTRY_MAP.keys()))
 INDUSTRIES = sorted(list(set(ACCOUNT_INDUSTRY_MAP.values())))
-
 
 # === API CONFIGURATION ===
 API_CONFIGS = [
@@ -909,7 +868,7 @@ API_CONFIGS = [
             "Q12. How well does solving this problem align with organizational strategy or goals? Score 0–5. Provide justification."
         )
     },
-    {
+ {
         "name": "hardness_summary",
         "url": "https://eoc.mu-sigma.com/talos-engine/agency/reasoning_api?society_id=1757657318406&agency_id=1758619658634&level=1",
         "multiround_convo": 2,
@@ -918,21 +877,40 @@ API_CONFIGS = [
             f"Problem statement - {problem}\n\n"
             "Context from all previous analysis:\n"
             f"Current System:\n{outputs.get('current_system','')}\n"
-            f"Q1:\n{outputs.get('Q1. What is the frequency and pace of change in the key inputs driving the business?','')}\n"
-            f"Q2:\n{outputs.get('Q2. To what extent are these changes cyclical and predictable versus sporadic and unpredictable?','')}\n"
-            f"Q3:\n{outputs.get('Q3. How resilient is the current system in absorbing these changes without requiring significant rework or disruption?','')}\n"
-            f"Q4:\n{outputs.get('Q4. To what extent do stakeholders share a common understanding of the key terms and concepts?','')}\n"
-            f"Q5:\n{outputs.get('Q5. Are there any conflicting definitions or interpretations that could create confusion?','')}\n"
-            f"Q6:\n{outputs.get('Q6. Are objectives, priorities, and constraints clearly communicated and well-defined?','')}\n"
-            f"Q7:\n{outputs.get('Q7. To what extent are key inputs interdependent?','')}\n"
-            f"Q8:\n{outputs.get('Q8. How well are the governing rules, functions, and relationships between inputs understood?','')}\n"
-            f"Q9:\n{outputs.get('Q9. Are there any hidden or latent dependencies that could impact outcomes?','')}\n"
-            f"Q10:\n{outputs.get('Q10. Are there hidden or latent dependencies that could affect outcomes?','')}\n"
-            f"Q11:\n{outputs.get('Q11. Are feedback loops insufficient or missing, limiting our ability to adapt?','')}\n"
-            f"Q12:\n{outputs.get('Q12. Do we lack established benchmarks or “gold standards” to validate results?','')}\n\n"
-            "Provide Hardness Score, Level, Summary & Key Takeaways."
-            "Provide individual scores for Q1-Q12, dimension averages (Volatility=Q1-Q3, Ambiguity=Q4-Q6, Interconnectedness=Q7-Q9, Uncertainty=Q10-Q12), "
-            "overall difficulty score, hardness level (Easy: 0-3.0, Moderate: 3.1-4.0, Hard: 4.1-5.0), and justification for the assessment."
+            f"Q1:\n{outputs.get('Q1','')}\n"
+            f"Q2:\n{outputs.get('Q2','')}\n"
+            f"Q3:\n{outputs.get('Q3','')}\n"
+            f"Q4:\n{outputs.get('Q4','')}\n"
+            f"Q5:\n{outputs.get('Q5','')}\n"
+            f"Q6:\n{outputs.get('Q6','')}\n"
+            f"Q7:\n{outputs.get('Q7','')}\n"
+            f"Q8:\n{outputs.get('Q8','')}\n"
+            f"Q9:\n{outputs.get('Q9','')}\n"
+            f"Q10:\n{outputs.get('Q10','')}\n"
+            f"Q11:\n{outputs.get('Q11','')}\n"
+            f"Q12:\n{outputs.get('Q12','')}\n\n"
+            "Based on all the Q1-Q12 analysis above (which includes individual scores and detailed explanations), "
+            "provide a comprehensive assessment with the following sections IN THIS EXACT FORMAT:\n\n"
+            "Individual Question Scores\n"
+            "• Q1: [score]\n"
+            "• Q2: [score]\n"
+            "...\n\n"
+            "Dimension Averages\n"
+            "• Volatility: (Q1 + Q2 + Q3) / 3 = [calculation] = [result]\n"
+            "• Ambiguity: (Q4 + Q5 + Q6) / 3 = [calculation] = [result]\n"
+            "• Interconnectedness: (Q7 + Q8 + Q9) / 3 = [calculation] = [result]\n"
+            "• Uncertainty: (Q10 + Q11 + Q12) / 3 = [calculation] = [result]\n\n"
+            "Overall Difficulty Score\n"
+            "[Provide calculation and final score]\n\n"
+            "Hardness Level\n"
+            "[Easy: 0-3.0, Moderate: 3.1-4.0, or Hard: 4.1-5.0]\n\n"
+            "SME Justification\n"
+            "[Provide detailed justification analyzing all four dimensions with specific insights]\n\n"
+            "Summary\n"
+            "[Provide a concise summary of the overall assessment in 2-3 sentences]\n\n"
+            "Key Takeaways\n"
+            "[Provide 3-5 bullet points with actionable insights]\n\n"
+            "IMPORTANT: Make sure each section is clearly labeled with its header as shown above."
         )
     }
 ]
@@ -990,28 +968,148 @@ def sanitize_text(text):
     return text.strip()
 
 def extract_full_sme_justification(text):
-    """Extract the full SME justification from the hardness summary with proper formatting"""
+    """Extract the complete SME Justification section for page 1"""
     if not text:
         return ""
-    
-    # Look for SME Justification section specifically
+    # Look for SME Justification section and extract everything in it.
+    # Be flexible about spacing and headers that follow (Summary, Key Takeaways, Individual Question Scores, Dimension Averages, Overall Difficulty Score, Hardness Level)
     patterns = [
-        r"(?:SME Justification)[:\s]*(.*?)(?=\n\n[A-Z]|\Z)",
-        r"(?:Full Justification|Comprehensive Analysis|Detailed Assessment)[:\s]*(.*?)(?=\n\n[A-Z]|\Z)",
+        r"SME Justification[:\s]*((?:.|\n)*?)(?=\n\s*(?:Summary|Key Takeaways|Key Takeaway|Individual Question Scores|Dimension Averages|Overall Difficulty Score|Hardness Level|$))",
+        r"Justification[:\s]*((?:.|\n)*?)(?=\n\s*(?:Summary|Key Takeaways|Key Takeaway|Individual Question Scores|Dimension Averages|Overall Difficulty Score|Hardness Level|$))",
+        r"SME[:\s]*((?:.|\n)*)$",
     ]
-    
+
     for pattern in patterns:
         match = re.search(pattern, text, re.IGNORECASE | re.DOTALL)
         if match:
             justification = match.group(1).strip()
-            if len(justification) > 100:
+            if justification:
                 return format_sme_justification(justification)
+
+    # If no specific section found, return the entire text (it might be just the justification)
+    return format_sme_justification(text)
+
+def format_sme_justification(text):
+    """Format SME justification with proper HTML formatting"""
+    if not text:
+        return ""
     
-    # If no specific section found, try to extract from the full text
-    if "Volatility" in text and "Ambiguity" in text:
-        return format_sme_justification(text)
+    # Clean up the text
+    text = sanitize_text(text)
     
-    return ""
+    # Format dimension headings with bold
+    text = re.sub(r'(Volatility|Ambiguity|Interconnectedness|Uncertainty)[:\s]*([\d.]+)?', 
+                 r'<strong>\1\2</strong>', text)
+    
+    # Format bullet points
+    text = re.sub(r'•\s*', '<br>• ', text)
+    text = re.sub(r'(\w):\s*•', r'\1:<br>•', text)
+    
+    # Clean up multiple newlines
+    text = re.sub(r'\n{3,}', '\n\n', text)
+    # Convert remaining newlines to HTML breaks for display in Streamlit
+    text = text.strip()
+    text = text.replace('\n\n', '<br><br>')
+    text = text.replace('\n', '<br>')
+    return text
+def extract_comprehensive_analysis(text):
+    """Extract everything from API response EXCEPT score calculations and SME Justification"""
+    if not text:
+        return ""
+    # First, try to explicitly extract Summary and Key Takeaways if present.
+    # This ensures the final page surfaces the concise summary and bullets the user expects.
+    summary_match = re.search(r"Summary[:\s]*((?:.|\n)*?)(?=\n\s*Key Takeaways|\n\s*Key Takeaway|$)", text, flags=re.IGNORECASE | re.DOTALL)
+    key_takeaways_match = re.search(r"Key Takeaways?[:\s]*((?:.|\n)*)$", text, flags=re.IGNORECASE | re.DOTALL)
+
+    parts = []
+    if summary_match:
+        summary = summary_match.group(1).strip()
+        if summary:
+            parts.append("Summary:\n" + summary)
+
+    if key_takeaways_match:
+        kt = key_takeaways_match.group(1).strip()
+        if kt:
+            parts.append("Key Takeaways:\n" + kt)
+
+    if parts:
+        combined = "\n\n".join(parts)
+        # Sanitize and convert newlines to HTML breaks for proper display in Streamlit
+        cleaned = sanitize_text(combined)
+        cleaned = cleaned.replace('\r\n', '\n')
+        cleaned = cleaned.replace('\n\n', '<br><br>')
+        cleaned = cleaned.replace('\n', '<br>')
+        return cleaned
+
+    # If specific sections aren't present, fall back to the previous approach:
+    # remove detailed score/calculation sections and SME Justification, leaving the remaining prose.
+    # Remove Individual Question Scores section
+    text = re.sub(
+        r'Individual Question Scores.*?(?=\n\nDimension|\n\nOverall|\n\nHardness|\n\nSME|\Z)',
+        '',
+        text,
+        flags=re.IGNORECASE | re.DOTALL
+    )
+
+    # Remove Dimension Averages section
+    text = re.sub(
+        r'Dimension Averages.*?(?=\n\nOverall|\n\nHardness|\n\nSME|\Z)',
+        '',
+        text,
+        flags=re.IGNORECASE | re.DOTALL
+    )
+
+    # Remove Overall Difficulty Score section
+    text = re.sub(
+        r'Overall Difficulty Score.*?(?=\n\nHardness|\n\nSME|\Z)',
+        '',
+        text,
+        flags=re.IGNORECASE | re.DOTALL
+    )
+
+    # Remove Hardness Level section
+    text = re.sub(
+        r'Hardness Level.*?(?=\n\nSME|\Z)',
+        '',
+        text,
+        flags=re.IGNORECASE | re.DOTALL
+    )
+
+    # Remove SME Justification section
+    text = re.sub(
+        r'SME Justification.*',
+        '',
+        text,
+        flags=re.IGNORECASE | re.DOTALL
+    )
+
+    # Remove any remaining score-related patterns
+    score_patterns = [
+        r'Q\d+\s*Score.*?\n',
+        r'Score:.*?\n',
+        r'\d+\.\d+\s*/\s*5',
+        r'Individual.*?Scores',
+        r'Dimension.*?Averages',
+        r'Overall.*?Score',
+        r'Hardness.*?Level'
+    ]
+
+    for pattern in score_patterns:
+        text = re.sub(pattern, '', text, flags=re.IGNORECASE)
+
+    # Clean up the remaining text
+    text = sanitize_text(text)
+
+    # Remove any empty sections and clean up formatting
+    text = re.sub(r'\n{3,}', '\n\n', text)
+    text = text.strip()
+
+    # Convert newlines to HTML breaks for display
+    text = text.replace('\r\n', '\n')
+    text = text.replace('\n\n', '<br><br>')
+    text = text.replace('\n', '<br>')
+
+    return text
 
 def format_sme_justification(text):
     """Format SME justification with bold dimension headings and proper HTML"""
@@ -1073,17 +1171,16 @@ def extract_individual_question_scores(text):
         return {}
     
     scores = {}
-    
-    patterns = [
+    # First pass: simple inline patterns (Q7: 3, Q7 Score: 3, Q7 - 3)
+    inline_patterns = [
         r"Q(\d+)(?:\s+Score)?:\s*(\d+(?:\.\d+)?)\s*(?:/\s*5)?",
         r"Question\s+(\d+).*?Score[:\s]+(\d+(?:\.\d+)?)",
         r"Q(\d+)\s*[-–]\s*(?:Score[:\s]+)?(\d+(?:\.\d+)?)",
         r"Q(\d+)[^\d]*?(\d+(?:\.\d+)?)\s*/\s*5",
     ]
-    
-    for pattern in patterns:
-        matches = re.finditer(pattern, text, re.IGNORECASE | re.MULTILINE)
-        for match in matches:
+
+    for pattern in inline_patterns:
+        for match in re.finditer(pattern, text, re.IGNORECASE | re.MULTILINE | re.DOTALL):
             try:
                 q_num = int(match.group(1))
                 score = float(match.group(2))
@@ -1091,7 +1188,46 @@ def extract_individual_question_scores(text):
                     scores[f"Q{q_num}"] = score
             except (ValueError, IndexError):
                 continue
-    
+
+    # Second pass: scan each question block (from Qn up to next Q#) and look for a score anywhere inside that block.
+    # This handles outputs where the question text appears first and the score appears later on a separate line.
+    for q_num in range(1, 13):
+        key = f"Q{q_num}"
+        if key in scores:
+            # already found via inline patterns
+            continue
+
+        # Build a non-greedy block pattern from this question to the next question or end of text
+        block_pattern = rf"(Q{q_num}\b.*?)(?=\n\s*Q\d\b|\Z)"
+        m = re.search(block_pattern, text, re.IGNORECASE | re.DOTALL)
+        if not m:
+            continue
+
+        block = m.group(1)
+
+        # look for common score formats inside the block
+        block_patterns = [
+            r"Score[:\s]*([0-5](?:\.\d+)?)",
+            r"Final\s*Score[:\s]*([0-5](?:\.\d+)?)",
+            r"([0-5](?:\.\d+)?)\s*/\s*5",
+            r"[:\s]([0-5](?:\.\d+)?)(?:\s*/\s*5)?\s*$",  # number at end of block/line
+        ]
+
+        found = None
+        for bp in block_patterns:
+            bm = re.search(bp, block, re.IGNORECASE | re.MULTILINE | re.DOTALL)
+            if bm:
+                try:
+                    val = float(bm.group(1))
+                    if 0 <= val <= 5:
+                        found = val
+                        break
+                except (ValueError, IndexError):
+                    continue
+
+        if found is not None:
+            scores[key] = found
+
     return scores
 
 def calculate_dimension_scores_from_questions(question_scores):
@@ -1220,6 +1356,21 @@ def init_session_state():
 
 init_session_state()
 
+
+def reset_app_state():
+    """Reset session state to defaults for a new analysis."""
+    keys_to_keep = [
+        # Keep UI defaults but reset user inputs/outputs
+        'current_page', 'account', 'industry'
+    ]
+    preserved = {k: st.session_state.get(k) for k in keys_to_keep}
+    st.session_state.clear()
+    init_session_state()
+    for k, v in preserved.items():
+        st.session_state[k] = v
+    st.success("🔄 Application state reset. You can start a new analysis.")
+    st.experimental_rerun()
+
 # -----------------------------
 # PAGE 1: Business Problem Input & Analysis
 # -----------------------------
@@ -1297,6 +1448,9 @@ if st.session_state.current_page == "page1":
                          st.session_state.industry != "Select Industry" and 
                          st.session_state.account != "Select Account")
         )
+        # Reset button next to analyze
+        if st.button("🔁 Reset", use_container_width=False, type="secondary"):
+            reset_app_state()
     
     with col2:
         # Vocabulary Button - toggle functionality
@@ -1501,16 +1655,22 @@ if st.session_state.current_page == "page1":
                 </div>
                 ''', unsafe_allow_html=True)
         
-        # SME Justification Section - IN ORANGE BORDER BOX
+        # SME Justification Section - FULL CONTENT in orange-bordered box
         st.markdown('<div class="section-title-box"><h3>SME Justification</h3></div>', unsafe_allow_html=True)
-        
-        if st.session_state.summary:
-            # Remove any --- separators from the justification
-            clean_summary = re.sub(r'---+\s*', '', st.session_state.summary)
-            st.markdown(f'<div class="info-card">{clean_summary}</div>', unsafe_allow_html=True)
+
+        # Prefer extracting the full SME Justification from the raw hardness_summary_text to avoid trimmed paragraphs
+        full_hs = st.session_state.get('hardness_summary_text', '')
+        full_sme = ''
+        if full_hs and full_hs.strip():
+            full_sme = extract_full_sme_justification(full_hs)
+
+        if full_sme:
+            st.markdown(f'<div class="info-card">{full_sme}</div>', unsafe_allow_html=True)
+        elif st.session_state.summary:
+            st.markdown(f'<div class="info-card">{st.session_state.summary}</div>', unsafe_allow_html=True)
         else:
-            st.markdown('<div class="info-card">Justification not available.</div>', unsafe_allow_html=True)
-        
+            st.markdown('<div class="info-card">SME Justification not available.</div>', unsafe_allow_html=True)
+
         # Large In Detail Button
         st.markdown("---")
         if st.button("🔍 View In Detail Analysis →", key="in_detail_main", use_container_width=True, type="primary"):
@@ -1771,24 +1931,61 @@ elif st.session_state.current_page == "hardness_summary":
         </div>
         ''', unsafe_allow_html=True)
     
-    # Full Summary
+    # Comprehensive Analysis (Everything EXCEPT scores and SME Justification)
     st.markdown('''
     <div class="section-title-box">
         <h3>📝 Comprehensive Analysis</h3>
     </div>
     ''', unsafe_allow_html=True)
-    
+
     if st.session_state.hardness_summary_text:
-        clean_summary = sanitize_text(st.session_state.hardness_summary_text)
-        st.markdown(f'<div class="info-card">{clean_summary}</div>', unsafe_allow_html=True)
+        hs_text = st.session_state.hardness_summary_text
+
+        # Extract the filtered comprehensive analysis (everything except score calculations and SME justification)
+        comprehensive_analysis = extract_comprehensive_analysis(hs_text)
+
+        # If there's any content left after filtering, display it exactly as-is. This will include Summary/Key Takeaways
+        # if the API returned them (we don't strip them out here).
+        if comprehensive_analysis and comprehensive_analysis.strip():
+            st.markdown(f'<div class="info-card">{comprehensive_analysis}</div>', unsafe_allow_html=True)
+        else:
+            # If nothing remains after removing calculations and SME Justification, show SME Justification as fallback
+            sme = st.session_state.get('summary') or extract_full_sme_justification(hs_text)
+            if sme:
+                st.markdown(f'<div class="info-card">{sme}</div>', unsafe_allow_html=True)
+            else:
+                st.markdown('<div class="info-card">No comprehensive analysis or SME justification available.</div>', unsafe_allow_html=True)
     else:
-        st.markdown('<div class="info-card">No comprehensive summary available.</div>', unsafe_allow_html=True)
-    
-    # Back to start button
+        st.markdown('<div class="info-card">No hardness summary data available.</div>', unsafe_allow_html=True)
+
+    # Back to start button (always visible on the hardness_summary page)
     st.markdown("---")
-    if st.button("🏠 Back to Main Analysis", use_container_width=True, type="primary"):
-        st.session_state.current_page = "page1"
+    col1, col2 = st.columns([1, 1])
+    with col1:
+        if st.button("🏠 Back to Main Analysis", use_container_width=True, type="primary"):
+            st.session_state.current_page = "page1"
+            st.rerun()
+    with col2:
+        # Build a plain text report and provide a download button
+        report_lines = []
+        report_lines.append("Business Problem:\n")
+        report_lines.append(st.session_state.problem_text or "(no problem provided)")
+        report_lines.append("\n\nContext:\n")
+        report_lines.append(f"Industry: {st.session_state.get('industry','')}")
+        report_lines.append(f"\nAccount: {st.session_state.get('account','')}")
+        report_lines.append("\n\nCurrent System:\n")
+        report_lines.append(st.session_state.get('current_system_full','') or "No current system details")
+        report_lines.append("\n\nInputs:\n")
+        report_lines.append(st.session_state.get('input_text','') or "No inputs available")
+        report_lines.append("\n\nOutputs:\n")
+        report_lines.append(st.session_state.get('output_text','') or "No outputs available")
+        report_lines.append("\n\nPain Points:\n")
+        report_lines.append(st.session_state.get('pain_points_text','') or "No pain points identified")
+        report_lines.append("\n\nHardness Summary (raw):\n")
+        report_lines.append(st.session_state.get('hardness_summary_text','') or "No hardness summary available")
 
-        st.rerun()
-
-
+        report_content = "\n".join(report_lines)
+        try:
+            st.download_button(label="⬇️ Download Report (TXT)", data=report_content, file_name="hardness_report.txt", mime="text/plain")
+        except Exception:
+            st.markdown("<div class='info-card'>Unable to create download at this time.</div>", unsafe_allow_html=True)
