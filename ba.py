@@ -1368,7 +1368,47 @@ def reset_app_state():
     for k, v in preserved.items():
         st.session_state[k] = v
     st.success("🔄 Application state reset. You can start a new analysis.")
-    st.experimental_rerun()
+    # Use a safe rerun that works across Streamlit versions
+    safe_rerun()
+
+
+def safe_rerun():
+    """Attempt to rerun the Streamlit app in a way compatible across versions.
+
+    Strategy:
+    - If st.experimental_rerun exists, call it.
+    - Otherwise, try to raise Streamlit's internal RerunException from a few known locations.
+    - Final fallback: call st.stop() to end the current run (user interaction will trigger a rerun).
+    """
+    try:
+        if hasattr(st, 'experimental_rerun'):
+            st.experimental_rerun()
+            return
+    except Exception:
+        pass
+
+    # Try to import and raise common RerunException locations
+    possible_exc_paths = [
+        ('streamlit.runtime.scriptrunner', 'RerunException'),
+        ('streamlit.script_runner', 'RerunException'),
+        ('streamlit.scriptrunner', 'RerunException'),
+    ]
+    for module_path, exc_name in possible_exc_paths:
+        try:
+            mod = __import__(module_path, fromlist=[exc_name])
+            exc = getattr(mod, exc_name, None)
+            if exc:
+                raise exc()
+        except Exception:
+            # ignore and try next
+            continue
+
+    # Last-resort fallback
+    try:
+        st.stop()
+    except Exception:
+        # If even st.stop fails, just return
+        return
 
 # -----------------------------
 # PAGE 1: Business Problem Input & Analysis
@@ -1988,4 +2028,5 @@ elif st.session_state.current_page == "hardness_summary":
             st.download_button(label="⬇️ Download Report (TXT)", data=report_content, file_name="hardness_report.txt", mime="text/plain")
         except Exception:
             st.markdown("<div class='info-card'>Unable to create download at this time.</div>", unsafe_allow_html=True)
+
 
