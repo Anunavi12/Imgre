@@ -2100,70 +2100,75 @@ elif st.session_state.current_page == "hardness_summary":
         except Exception:
             st.markdown("<div class='info-card'>Unable to create download at this time.</div>", unsafe_allow_html=True)
 
-# Mu-Sigma Logo with enhanced color protection
+# Mu-Sigma Logo - URL Version (Reliable)
 st.markdown("""
 <style>
-/* Additional protection against Streamlit color overrides */
-[data-testid="stAppViewContainer"] .musigma-logo,
-[data-testid="stAppViewContainer"] .musigma-logo * {
-    background: transparent !important;
-    background-image: none !important;
-    filter: none !important;
-    mix-blend-mode: normal !important;
+/* Mu-Sigma Logo Styles - URL Version */
+.musigma-logo {
+    position: fixed;
+    top: 14px;
+    right: 14px;
+    width: 80px;
+    height: 80px;
+    border-radius: 10px;
+    border: 2px solid rgba(255,255,255,0.9);
+    box-shadow: 0 8px 28px rgba(0,0,0,0.18);
+    z-index: 999999;
+    background: white !important;
+    opacity: 0.99;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
-/* Ensure logo stays on top of all Streamlit elements */
-.musigma-logo {
+.musigma-logo:hover { 
+    transform: translateY(-4px) scale(1.02); 
+    box-shadow: 0 12px 36px rgba(0,0,0,0.22);
+}
+
+@media (max-width: 640px) { 
+    .musigma-logo { 
+        display: none !important; 
+    } 
+}
+
+.musigma-logo img {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: contain !important;
+    display: block !important;
+    background: white !important;
+    padding: 8px !important;
+    border-radius: 6px !important;
+}
+
+.musigma-logo-link {
+    text-decoration: none !important;
+    display: inline-block !important;
+}
+
+/* Ensure logo stays on top */
+[data-testid="stAppViewContainer"] .musigma-logo {
     z-index: 999999 !important;
 }
 </style>
 """, unsafe_allow_html=True)
 
-import base64
-logo_path = os.path.join(os.path.dirname(__file__), 'musigma_logo.png')
-logo_html = ''
-
-if os.path.exists(logo_path):
-    try:
-        with open(logo_path, 'rb') as f:
-            data = f.read()
-        b64 = base64.b64encode(data).decode('utf-8')
-        # Use SVG wrapper for better color preservation
-        img_tag = f"""
-        <img src='data:image/png;base64,{b64}' 
+# URL-based Mu-Sigma logo implementation
+logo_html = """
+<a href='https://mu-sigma.com' target='_blank' rel='noopener' class='musigma-logo-link'>
+    <div class='musigma-logo' role='img' aria-label='Mu-Sigma logo'>
+        <img src='https://images.crunchbase.com/image/upload/c_lpad,f_auto,q_auto:eco,dpr_1/v1476120682/ypohk3ybtqb2gnq8hqxi.png' 
              alt='Mu-Sigma Logo' 
-             style='width: 100%; height: 100%; object-fit: contain; display: block;' 
-             onerror=\"this.style.display='none'; this.parentNode.innerHTML='μσ';\"
+             onerror=\"this.onerror=null; this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODAiIGhlaWdodD0iODAiIHZpZXdCb3g9IjAgMCA4MCA4MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iODAiIGhlaWdodD0iODAiIHJ4PSIxMCIgZmlsbD0iIzhiMWUxZSIvPjx0ZXh0IHg9IjQwIiB5PSI0OCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjI0IiBmb250LXdlaWdodD0iYm9sZCIgZmlsbD0id2hpdGUiPuaygPCfpo88L3RleHQ+PC9zdmc+';\" 
         />
-        """
-        logo_html = f"""
-        <a href='https://mu-sigma.com' target='_blank' rel='noopener' class='musigma-logo-link'>
-            <div class='musigma-logo' role='img' aria-label='Mu-Sigma logo'>
-                {img_tag}
-            </div>
-        </a>
-        """
-    except Exception as e:
-        # Fallback if image loading fails
-        logo_html = """
-        <a href='https://mu-sigma.com' target='_blank' rel='noopener' class='musigma-logo-link'>
-            <div class='musigma-logo' style='display:flex;align-items:center;justify-content:center;color:#000;font-weight:700;font-family:sans-serif;background:white;'>
-                μσ
-            </div>
-        </a>
-        """
-else:
-    # Text fallback with neutral colors
-    logo_html = """
-    <a href='https://mu-sigma.com' target='_blank' rel='noopener' class='musigma-logo-link'>
-        <div class='musigma-logo' style='display:flex;align-items:center;justify-content:center;color:#000;font-weight:700;font-family:sans-serif;background:white;'>
-            μσ
-        </div>
-    </a>
-    """
+    </div>
+</a>
+"""
 
 st.markdown(logo_html, unsafe_allow_html=True)
-
 # Inject JS/CSS: hide logo when user scrolls down, animate on load, and show a temporary "Wow amazing!" bubble on clicks
 st.markdown('''
 <style>
@@ -2206,5 +2211,6 @@ st.markdown('''
 })();
 </script>
 ''', unsafe_allow_html=True)
+
 
 
