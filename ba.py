@@ -619,7 +619,7 @@ h2, h3, h4, h5, h6,
     animation: pulse 4s ease-in-out infinite;
 }
 
-/* --- STREAMLIT SELECT BOXES --- */
+/* --- STREAMLIT SELECT BOXES (FIXED) --- */
 .stSelectbox {
     margin-bottom: 1rem;
 }
@@ -635,21 +635,23 @@ h2, h3, h4, h5, h6,
     background-color: var(--bg-card) !important; 
     border: 2px solid var(--border-color) !important; 
     border-radius: 16px !important; 
-    padding: 0.875rem 1.25rem !important; 
-    min-height: 58px !important; 
+    padding: 0.5rem 1rem !important; 
+    min-height: 48px !important; 
+    max-height: 48px !important;
     box-shadow: var(--shadow-sm);
     transition: all 0.3s ease; 
 }
 
 .stSelectbox > div > div:hover { 
-    border-color: var(--accent-black) !important; 
-    box-shadow: 0 4px 12px rgba(255, 107, 53, 0.2);
+    border-color: var(--accent-purple) !important; 
+    box-shadow: 0 4px 12px rgba(124, 58, 237, 0.2);
     transform: translateY(-2px); 
 }
 
 .stSelectbox [data-baseweb="select"] { 
     background-color: transparent !important; 
-    min-height: 50px !important;
+    min-height: 40px !important;
+    max-height: 40px !important;
 }
 
 .stSelectbox [data-baseweb="select"] > div {
@@ -657,19 +659,34 @@ h2, h3, h4, h5, h6,
     font-size: 1rem !important;
     font-weight: 500 !important;
     padding: 0 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    max-width: 100% !important;
+}
+
+/* Fix for selected text visibility */
+div[data-baseweb="select"] > div:first-child {
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    max-width: 100% !important;
+    padding-right: 20px !important;
 }
 
 [data-baseweb="popover"] { 
     background-color: var(--bg-card) !important; 
     border-radius: 16px !important;
     box-shadow: var(--shadow-lg) !important;
+    max-height: 300px !important;
+    overflow-y: auto !important;
 }
 
 ul[role="listbox"] { 
     background-color: var(--bg-card) !important; 
     border: 2px solid var(--border-color) !important; 
     border-radius: 16px !important; 
-    max-height: 320px !important; 
+    max-height: 280px !important; 
     overflow-y: auto !important; 
     box-shadow: var(--shadow-lg);
     padding: 0.5rem !important;
@@ -678,17 +695,20 @@ ul[role="listbox"] {
 li[role="option"] { 
     color: var(--text-primary) !important; 
     background-color: transparent !important; 
-    padding: 12px 16px !important; 
-    font-size: 1rem !important; 
-    line-height: 1.6 !important; 
+    padding: 10px 14px !important; 
+    font-size: 0.95rem !important; 
+    line-height: 1.5 !important; 
     transition: all 0.2s ease;
     border-radius: 10px !important;
     margin: 2px 0 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
 }
 
 li[role="option"]:hover { 
-    background-color: rgba(255, 107, 53, 0.1) !important; 
-    color: var(--accent-black) !important; 
+    background-color: rgba(124, 58, 237, 0.1) !important; 
+    color: var(--accent-purple) !important; 
     transform: translateX(5px); 
 }
 
@@ -887,55 +907,71 @@ TENANT_ID = "talos"
 AUTH_TOKEN = None
 HEADERS_BASE = {"Content-Type": "application/json"}
 
-# EXPANDED ACCOUNTS with Industry Mapping
+# -----------------------------
+# EXPANDED ACCOUNTS with Industry Mapping (Final Corrected Version)
+# -----------------------------
 ACCOUNT_INDUSTRY_MAP = {
     "Select Account": "Select Industry",
-    # Pharmaceutical
+
+    # --- Priority Accounts (shown first) ---
     "Abbvie": "Pharma",
     "BMS": "Pharma",
-    "Pfizer": "Pharma",
+    "BLR Airport": "Other",
+    "Chevron": "Energy",
+    "Coles": "Retail",
+    "DELL": "Technology",
+    "Microsoft": "Technology",
+    "Mu Labs": "Technology",
+    "Nike": "Consumer Goods",
+    "Skill Development": "Education",
+    "Southwest Airlines": "Airlines",
+    "Sabic": "Energy",
     "Johnson & Johnson": "Pharma",
+    "THD": "Retail",
+    "Tmobile": "Telecom",
+    "Walmart": "Retail",
+
+    # --- Rest of the Accounts ---
+    # Pharmaceutical
+    "Pfizer": "Pharma",
     "Novartis": "Pharma",
     "Merck": "Pharma",
     "Roche": "Pharma",
+
     # Technology
-    "Microsoft": "Technology",
-    "DELL": "Technology",
     "IBM": "Technology",
     "Oracle": "Technology",
     "SAP": "Technology",
     "Salesforce": "Technology",
     "Adobe": "Technology",
+
     # Retail
-    "Walmart": "Retail",
     "Target": "Retail",
     "Costco": "Retail",
     "Kroger": "Retail",
-    "Coles": "Retail",
     "Tesco": "Retail",
     "Carrefour": "Retail",
-    "THD": "Retail",
+
     # Airlines
-    "Southwest Airlines": "Airlines",
     "Delta Airlines": "Airlines",
     "United Airlines": "Airlines",
     "American Airlines": "Airlines",
     "Emirates": "Airlines",
     "Lufthansa": "Airlines",
-    "BLR Airport": "Airlines",
+
     # Consumer Goods
-    "Nike": "Consumer Goods",
     "Adidas": "Consumer Goods",
     "Unilever": "Consumer Goods",
     "Procter & Gamble": "Consumer Goods",
     "Coca-Cola": "Consumer Goods",
     "PepsiCo": "Consumer Goods",
+
     # Energy
-    "Chevron": "Energy",
     "ExxonMobil": "Energy",
     "Shell": "Energy",
     "BP": "Energy",
     "TotalEnergies": "Energy",
+
     # Finance
     "JPMorgan Chase": "Finance",
     "Bank of America": "Finance",
@@ -943,46 +979,72 @@ ACCOUNT_INDUSTRY_MAP = {
     "Goldman Sachs": "Finance",
     "Morgan Stanley": "Finance",
     "Citigroup": "Finance",
+
     # Healthcare
     "UnitedHealth": "Healthcare",
     "CVS Health": "Healthcare",
     "Anthem": "Healthcare",
+    
     "Humana": "Healthcare",
     "Kaiser Permanente": "Healthcare",
+
     # Logistics
     "FedEx": "Logistics",
     "UPS": "Logistics",
     "DHL": "Logistics",
     "Maersk": "Logistics",
     "Amazon Logistics": "Logistics",
+
     # E-commerce
     "Amazon": "E-commerce",
     "Alibaba": "E-commerce",
     "eBay": "E-commerce",
     "Shopify": "E-commerce",
     "Flipkart": "E-commerce",
+
     # Automotive
     "Tesla": "Automotive",
     "Ford": "Automotive",
     "General Motors": "Automotive",
     "Toyota": "Automotive",
     "Volkswagen": "Automotive",
+
     # Hospitality
     "Marriott": "Hospitality",
     "Hilton": "Hospitality",
     "Hyatt": "Hospitality",
     "Airbnb": "Hospitality",
+
     # Education
-    "Skill Development": "Education",
     "Coursera": "Education",
     "Udemy": "Education",
     "Khan Academy": "Education",
-    # Other
-    "Tmobile": "Telecommunications",
-    "Mu Labs":"Other"
+    "Mars": "Confectionery",
 }
 
-ACCOUNTS = sorted(list(ACCOUNT_INDUSTRY_MAP.keys()))
+# --- Priority Account Order ---
+PRIORITY_ACCOUNTS = [
+    "Abbvie", "BMS", "BLR Airport", "Chevron", "Coles", "DELL",
+    "Microsoft","Mars", "Mu Labs", "Nike", "Skill Development",
+    "Southwest Airlines", "Sabic", "Johnson & Johnson",
+    "THD", "Tmobile", "Walmart"
+]
+
+# --- Add Remaining Accounts (Alphabetically), keeping 'Others' at the end ---
+OTHER_ACCOUNTS = [
+    acc for acc in ACCOUNT_INDUSTRY_MAP.keys()
+    if acc not in PRIORITY_ACCOUNTS and acc != "Select Account"
+]
+OTHER_ACCOUNTS.sort()
+OTHER_ACCOUNTS.append("Others")  # ✅ Keep Others at last
+
+# --- Final Ordered Account List ---
+ACCOUNTS = ["Select Account"] + PRIORITY_ACCOUNTS + OTHER_ACCOUNTS
+
+# --- Add 'Others' Industry mapping ---
+ACCOUNT_INDUSTRY_MAP["Others"] = "Other"
+
+# --- Unique Industries ---
 INDUSTRIES = sorted(list(set(ACCOUNT_INDUSTRY_MAP.values())))
 
 # === API CONFIGURATION ===
@@ -1610,7 +1672,10 @@ def init_session_state():
         "input_text": "",
         "output_text": "",
         "pain_points_text": "",
-        "hardness_summary_text": ""
+        "hardness_summary_text": "",
+        # ADD THESE FOR AUTO-MAPPING
+        "selected_account": "Select Account",
+        "selected_industry": "Select Industry"
     }
     
     for key, default_value in defaults.items():
@@ -1635,6 +1700,9 @@ def reset_app_state():
     st.session_state.industry = 'Select Industry'
     st.session_state.problem_text = ''
     st.session_state.account_input = ''
+    # RESET AUTO-MAPPING VARIABLES
+    st.session_state.selected_account = 'Select Account'
+    st.session_state.selected_industry = 'Select Industry'
 
     # Clear analysis outputs and derived fields
     st.session_state.outputs = {}
@@ -1659,45 +1727,6 @@ def reset_app_state():
     st.success("🔄 Application state reset. You can start a new analysis.")
     # Trigger a rerun so the UI reflects the cleared state immediately
     safe_rerun()
-
-
-def safe_rerun():
-    """Attempt to rerun the Streamlit app in a way compatible across versions.
-
-    Strategy:
-    - If st.experimental_rerun exists, call it.
-    - Otherwise, try to raise Streamlit's internal RerunException from a few known locations.
-    - Final fallback: call st.stop() to end the current run (user interaction will trigger a rerun).
-    """
-    try:
-        if hasattr(st, 'experimental_rerun'):
-            st.experimental_rerun()
-            return
-    except Exception:
-        pass
-
-    # Try to import and raise common RerunException locations
-    possible_exc_paths = [
-        ('streamlit.runtime.scriptrunner', 'RerunException'),
-        ('streamlit.script_runner', 'RerunException'),
-        ('streamlit.scriptrunner', 'RerunException'),
-    ]
-    for module_path, exc_name in possible_exc_paths:
-        try:
-            mod = __import__(module_path, fromlist=[exc_name])
-            exc = getattr(mod, exc_name, None)
-            if exc:
-                raise exc()
-        except Exception:
-            # ignore and try next
-            continue
-
-    # Last-resort fallback
-    try:
-        st.stop()
-    except Exception:
-        # If even st.stop fails, just return
-        return
 # -----------------------------
 # PAGE 1: Business Problem Input & Analysis
 # -----------------------------
@@ -1716,6 +1745,7 @@ if st.session_state.current_page == "page1":
         </p>
     </div>
     """, unsafe_allow_html=True)
+    
     # Account & Industry Selection
     st.markdown('<div class="section-title-box"><h3>🏢 Account & Industry Selection</h3></div>', unsafe_allow_html=True)
     
@@ -1723,7 +1753,7 @@ if st.session_state.current_page == "page1":
     
     with col1:
         try:
-            current_account_index = ACCOUNTS.index(st.session_state.account)
+            current_account_index = ACCOUNTS.index(st.session_state.selected_account)
         except:
             current_account_index = 0
         
@@ -1734,36 +1764,44 @@ if st.session_state.current_page == "page1":
             key="account_selector_all"
         )
         
-        if selected_account != st.session_state.account:
+        # Auto-update industry when account changes
+        if selected_account != st.session_state.selected_account:
+            st.session_state.selected_account = selected_account
+            st.session_state.selected_industry = ACCOUNT_INDUSTRY_MAP.get(selected_account, "Select Industry")
+            # Also update the original session state variables for compatibility
             st.session_state.account = selected_account
-            if selected_account in ACCOUNT_INDUSTRY_MAP:
-                st.session_state.industry = ACCOUNT_INDUSTRY_MAP[selected_account]
-                st.success(f"✅ Industry auto-mapped to: {st.session_state.industry}")
+            st.session_state.industry = st.session_state.selected_industry
             st.rerun()
     
     with col2:
         try:
-            current_industry_index = INDUSTRIES.index(st.session_state.industry)
+            current_industry_index = INDUSTRIES.index(st.session_state.selected_industry)
         except:
             current_industry_index = 0
         
-        if st.session_state.account == "Select Account":
+        if st.session_state.selected_account == "Select Account":
             selected_industry = st.selectbox(
                 "Select Industry:",
                 options=INDUSTRIES,
                 index=current_industry_index,
                 key="industry_selector"
             )
-            if selected_industry != st.session_state.industry:
+            # Handle manual industry selection when no account is selected
+            if selected_industry != st.session_state.selected_industry:
+                st.session_state.selected_industry = selected_industry
                 st.session_state.industry = selected_industry
         else:
-            st.selectbox(
-                "Industry (Auto-mapped):",
+            # Display auto-mapped industry (can still be manually changed)
+            selected_industry = st.selectbox(
+                "Industry:",
                 options=INDUSTRIES,
                 index=current_industry_index,
-                disabled=True,
-                key="industry_disabled"
+                key="industry_selector_auto"
             )
+            # Handle manual industry override
+            if selected_industry != st.session_state.selected_industry:
+                st.session_state.selected_industry = selected_industry
+                st.session_state.industry = selected_industry
     
     # Business Problem Description
     st.markdown('<div class="section-title-box"><h3>📝 Business Problem Description</h3></div>', unsafe_allow_html=True)
@@ -2457,4 +2495,3 @@ st.markdown('''
 })();
 </script>
 ''', unsafe_allow_html=True)
-
