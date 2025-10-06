@@ -17,6 +17,9 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
+# -----------------------------
+# Custom CSS with All Improvements
+# -----------------------------
 st.markdown("""
 <style>
 /* --- GOOGLE FONTS --- */
@@ -26,6 +29,11 @@ st.markdown("""
 #MainMenu, footer, header { visibility: hidden; }
 .element-container:empty { display: none !important; }
 div[data-testid="stVerticalBlock"] > div:empty { display: none !important; }
+
+/* --- AUTO-SCROLL TO TOP --- */
+html {
+    scroll-behavior: smooth;
+}
 
 /* --- COLOR VARIABLES (MU-SIGMA BRAND) --- */
 :root {
@@ -100,6 +108,39 @@ div[data-testid="stVerticalBlock"] > div:empty { display: none !important; }
     50% { box-shadow: 0 0 25px rgba(255, 107, 53, 0.6); }
 }
 
+/* --- FIXED CIRCULAR LOGO --- */
+.musigma-logo {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    border: 3px solid var(--musigma-red);
+    box-shadow: 0 8px 32px rgba(139, 30, 30, 0.3);
+    z-index: 999999;
+    background: white;
+    opacity: 1;
+    overflow: hidden;
+    transition: transform 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.musigma-logo:hover { 
+    transform: scale(1.1);
+    box-shadow: 0 12px 40px rgba(139, 30, 30, 0.4);
+}
+
+.musigma-logo img {
+    width: 85% !important;
+    height: 85% !important;
+    object-fit: contain !important;
+    padding: 8px;
+    border-radius: 50%;
+}
+
 /* --- APP BACKGROUND --- */
 .main { 
     font-family: 'Inter', sans-serif; 
@@ -158,45 +199,69 @@ div[data-testid="stVerticalBlock"] > div:empty { display: none !important; }
     letter-spacing: 0.5px;
 }
 
-/* Decorative elements - STATIC */
-.title-decoration {
-    position: absolute;
-    font-size: 3rem;
-    opacity: 0.12;
+/* --- CONSISTENT BUTTON LAYOUT --- */
+.navigation-buttons {
+    display: grid;
+    grid-template-columns: 1fr 2fr 1fr;
+    gap: 1rem;
+    margin: 2rem 0;
+    align-items: center;
 }
 
-.deco-1 { top: 25px; left: 40px; }
-.deco-2 { top: 35px; right: 50px; }
-.deco-3 { bottom: 30px; left: 60px; }
-.deco-4 { bottom: 25px; right: 70px; }
-
-/* Mu-Sigma Logo - FIXED POSITION */
-.musigma-logo {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    width: 95px;
-    height: 95px;
-    border-radius: 50%;
-    border: 3px solid var(--musigma-red);
-    box-shadow: 0 10px 40px rgba(139, 30, 30, 0.4);
-    z-index: 9999;
-    background: white;
-    opacity: 1;
+.nav-button {
+    background: linear-gradient(135deg, var(--musigma-red) 0%, var(--accent-orange) 100%);
+    color: #ffffff !important;
+    border: none;
+    border-radius: 16px;
+    padding: 1rem 2rem;
+    font-weight: 700;
+    font-size: 1.1rem;
+    box-shadow: var(--shadow-md);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+    position: relative;
     overflow: hidden;
-    animation: fadeIn 1s ease-out;
+    text-align: center;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 54px;
 }
 
-.musigma-logo:hover { 
-    box-shadow: 0 15px 50px rgba(139, 30, 30, 0.6);
-    animation: borderGlow 2s ease-in-out infinite;
+.nav-button::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.3);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
 }
 
-.musigma-logo img {
-    width: 100% !important;
-    height: 100% !important;
-    object-fit: contain !important;
-    padding: 12px;
+.nav-button:hover::before {
+    width: 400px;
+    height: 400px;
+}
+
+.nav-button:hover { 
+    transform: translateY(-4px) scale(1.02); 
+    box-shadow: 0 10px 30px rgba(139, 30, 30, 0.4);
+}
+
+.nav-button:active { 
+    transform: translateY(-2px); 
+}
+
+.nav-button-secondary {
+    background: linear-gradient(135deg, #64748b 0%, #475569 100%);
+}
+
+.nav-button-secondary:hover {
+    box-shadow: 0 10px 30px rgba(100, 116, 139, 0.4);
 }
 
 /* --- SECTION HEADINGS (CENTERED) --- */
@@ -862,8 +927,13 @@ li[role="option"][aria-selected="true"] {
     }
     
     .musigma-logo {
-        width: 75px;
-        height: 75px;
+        width: 60px;
+        height: 60px;
+    }
+    
+    .navigation-buttons {
+        grid-template-columns: 1fr;
+        gap: 0.5rem;
     }
 }
 
@@ -894,12 +964,53 @@ li[role="option"][aria-selected="true"] {
 </style>
 """, unsafe_allow_html=True)
 
-# Logo
-st.markdown('''
+# -----------------------------
+# Auto-Scroll JavaScript
+# -----------------------------
+st.markdown("""
+<script>
+// Auto-scroll to top on page navigation
+function scrollToTop() {
+    window.scrollTo({top: 0, behavior: 'smooth'});
+}
+
+// Scroll to top when page loads or changes
+window.addEventListener('load', scrollToTop);
+document.addEventListener('DOMContentLoaded', scrollToTop);
+
+// Listen for Streamlit events that indicate page changes
+const observer = new MutationObserver(function(mutations) {
+    mutations.forEach(function(mutation) {
+        if (mutation.type === 'childList') {
+            // Check if main content area changed
+            const mainContent = document.querySelector('.main');
+            if (mainContent && mutation.target.contains(mainContent)) {
+                setTimeout(scrollToTop, 100);
+            }
+        }
+    });
+});
+
+// Start observing when DOM is ready
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function() {
+        observer.observe(document.body, { childList: true, subtree: true });
+    });
+} else {
+    observer.observe(document.body, { childList: true, subtree: true });
+}
+</script>
+""", unsafe_allow_html=True)
+
+# -----------------------------
+# Fixed Circular Logo
+# -----------------------------
+st.markdown(f'''
 <div class="musigma-logo">
-    <img src="https://yt3.googleusercontent.com/ytc/AIdro_k-7HkbByPWjKpVPO3LCF8XYlKuQuwROO0vf3zo1cqgoaE=s900-c-k-c0x00ffffff-no-rj" alt="Mu-Sigma">
+    <img src="https://yt3.googleusercontent.com/ytc/AIdro_k-7HkbByPWjKpVPO3LCF8XYlKuQuwROO0vf3zo1cqgoaE=s900-c-k-c0x00ffffff-no-rj" alt="Mu-Sigma Logo">
 </div>
 ''', unsafe_allow_html=True)
+
 # -----------------------------
 # Config - Data & Auth
 # -----------------------------
@@ -908,7 +1019,7 @@ AUTH_TOKEN = None
 HEADERS_BASE = {"Content-Type": "application/json"}
 
 # -----------------------------
-# EXPANDED ACCOUNTS with Industry Mapping (CORRECTED VERSION)
+# EXPANDED ACCOUNTS with Industry Mapping
 # -----------------------------
 ACCOUNT_INDUSTRY_MAP = {
     "Select Account": "Select Industry",
@@ -1018,13 +1129,13 @@ ACCOUNT_INDUSTRY_MAP = {
     "Coursera": "Education",
     "Udemy": "Education",
     "Khan Academy": "Education",
-    "Mars": "Consumer Goods",  # CORRECTED: Mars should be Consumer Goods, not Confectionery
+    "Mars": "Consumer Goods",
 }
 
 # --- Priority Account Order ---
 PRIORITY_ACCOUNTS = [
     "Abbvie", "BMS", "BLR Airport", "Chevron", "Coles", "DELL",
-    "Microsoft", "Mars", "Mu Labs", "Nike", "Skill Development",  # CORRECTED: Mars was missing comma
+    "Microsoft", "Mars", "Mu Labs", "Nike", "Skill Development",
     "Southwest Airlines", "Sabic", "Johnson & Johnson",
     "THD", "Tmobile", "Walmart"
 ]
@@ -1037,7 +1148,7 @@ OTHER_ACCOUNTS = [
 OTHER_ACCOUNTS.sort()
 
 # Add "Others" account to both lists
-OTHER_ACCOUNTS.append("Others")  # ✅ Keep Others at last
+OTHER_ACCOUNTS.append("Others")
 
 # --- Final Ordered Account List ---
 ACCOUNTS = ["Select Account"] + PRIORITY_ACCOUNTS + OTHER_ACCOUNTS
@@ -1046,9 +1157,7 @@ ACCOUNTS = ["Select Account"] + PRIORITY_ACCOUNTS + OTHER_ACCOUNTS
 ACCOUNT_INDUSTRY_MAP["Others"] = "Other"
 
 # --- Unique Industries ---
-# Remove "Confectionery" and "Select Industry" from the industries list
 all_industries = list(set(ACCOUNT_INDUSTRY_MAP.values()))
-# Filter out "Select Industry" and any non-standard industries
 INDUSTRIES = sorted([industry for industry in all_industries 
                     if industry != "Select Industry"])
 
@@ -1059,11 +1168,6 @@ INDUSTRIES.sort()
 
 # Add "Select Industry" at the beginning
 INDUSTRIES = ["Select Industry"] + INDUSTRIES
-
-# Debug info (you can remove this in production)
-print(f"Total Accounts: {len(ACCOUNTS)}")
-print(f"Total Industries: {len(INDUSTRIES)}")
-print(f"Industries: {INDUSTRIES}")
 
 # === API CONFIGURATION ===
 API_CONFIGS = [
@@ -1315,7 +1419,6 @@ def extract_full_sme_justification(text):
     if not text:
         return ""
     # Look for SME Justification section and extract everything in it.
-    # Be flexible about spacing and headers that follow (Summary, Key Takeaways, Individual Question Scores, Dimension Averages, Overall Difficulty Score, Hardness Level)
     patterns = [
         r"SME Justification[:\s]*((?:.|\n)*?)(?=\n\s*(?:Summary|Key Takeaways|Key Takeaway|Individual Question Scores|Dimension Averages|Overall Difficulty Score|Hardness Level|$))",
         r"Justification[:\s]*((?:.|\n)*?)(?=\n\s*(?:Summary|Key Takeaways|Key Takeaway|Individual Question Scores|Dimension Averages|Overall Difficulty Score|Hardness Level|$))",
@@ -1355,12 +1458,12 @@ def format_sme_justification(text):
     text = text.replace('\n\n', '<br><br>')
     text = text.replace('\n', '<br>')
     return text
+
 def extract_comprehensive_analysis(text):
     """Extract everything from API response EXCEPT score calculations and SME Justification"""
     if not text:
         return ""
     # First, try to explicitly extract Summary and Key Takeaways if present.
-    # This ensures the final page surfaces the concise summary and bullets the user expects.
     summary_match = re.search(r"Summary[:\s]*((?:.|\n)*?)(?=\n\s*Key Takeaways|\n\s*Key Takeaway|$)", text, flags=re.IGNORECASE | re.DOTALL)
     key_takeaways_match = re.search(r"Key Takeaways?[:\s]*((?:.|\n)*)$", text, flags=re.IGNORECASE | re.DOTALL)
 
@@ -1385,8 +1488,6 @@ def extract_comprehensive_analysis(text):
         return cleaned
 
     # If specific sections aren't present, fall back to the previous approach:
-    # remove detailed score/calculation sections and SME Justification, leaving the remaining prose.
-    # Remove Individual Question Scores section
     text = re.sub(
         r'Individual Question Scores.*?(?=\n\nDimension|\n\nOverall|\n\nHardness|\n\nSME|\Z)',
         '',
@@ -1454,26 +1555,6 @@ def extract_comprehensive_analysis(text):
 
     return text
 
-def format_sme_justification(text):
-    """Format SME justification with bold dimension headings and proper HTML"""
-    if not text:
-        return ""
-    
-    # Format dimension headings with bold and scores
-    text = re.sub(r'(Volatility):\s*([\d.]+)', r'<strong>Volatility:</strong> \2/5', text)
-    text = re.sub(r'(Ambiguity):\s*([\d.]+)', r'<strong>Ambiguity:</strong> \2/5', text)
-    text = re.sub(r'(Interconnectedness):\s*([\d.]+)', r'<strong>Interconnectedness:</strong> \2/5', text)
-    text = re.sub(r'(Uncertainty):\s*([\d.]+)', r'<strong>Uncertainty:</strong> \2/5', text)
-    
-    # Format bullet points
-    text = re.sub(r'•\s*', '<br>• ', text)
-    text = re.sub(r'(\w):\s*•', r'\1:<br>•', text)
-    
-    # Clean up multiple newlines
-    text = re.sub(r'\n{3,}', '\n\n', text)
-    
-    return text.strip()
-
 def format_vocabulary_with_bold(text):
     """Format vocabulary with proper bold styling for terms and definitions - COMPACT VERSION"""
     if not text:
@@ -1533,11 +1614,9 @@ def extract_individual_question_scores(text):
                 continue
 
     # Second pass: scan each question block (from Qn up to next Q#) and look for a score anywhere inside that block.
-    # This handles outputs where the question text appears first and the score appears later on a separate line.
     for q_num in range(1, 13):
         key = f"Q{q_num}"
         if key in scores:
-            # already found via inline patterns
             continue
 
         # Build a non-greedy block pattern from this question to the next question or end of text
@@ -1664,6 +1743,70 @@ def extract_current_system_sections(text):
     
     return sections
 
+def create_download_report():
+    """Create comprehensive download report with all API outputs and timestamps"""
+    report_lines = []
+    
+    # Header
+    report_lines.append("=" * 80)
+    report_lines.append("BUSINESS PROBLEM HARDNESS ANALYSIS REPORT")
+    report_lines.append("=" * 80)
+    report_lines.append(f"Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+    report_lines.append("")
+    
+    # Problem Context
+    report_lines.append("PROBLEM CONTEXT")
+    report_lines.append("-" * 40)
+    report_lines.append(f"Account: {st.session_state.get('account', 'N/A')}")
+    report_lines.append(f"Industry: {st.session_state.get('industry', 'N/A')}")
+    report_lines.append("")
+    report_lines.append("BUSINESS PROBLEM:")
+    report_lines.append(st.session_state.get('problem_text', 'No problem provided'))
+    report_lines.append("")
+    
+    # All API Outputs with Timestamps
+    report_lines.append("ANALYSIS RESULTS")
+    report_lines.append("-" * 40)
+    report_lines.append("")
+    
+    for api_name in st.session_state.get('outputs', {}):
+        report_lines.append(f"{api_name.upper()} ANALYSIS")
+        report_lines.append(f"Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+        report_lines.append("-" * 30)
+        output_text = st.session_state.outputs.get(api_name, 'No output available')
+        cleaned_text = sanitize_text(output_text)
+        report_lines.append(cleaned_text)
+        report_lines.append("")
+        report_lines.append("")
+    
+    # Scores Summary
+    report_lines.append("SCORES SUMMARY")
+    report_lines.append("-" * 40)
+    report_lines.append("")
+    
+    # Individual Question Scores
+    if st.session_state.get('question_scores'):
+        report_lines.append("Individual Question Scores:")
+        for q, score in sorted(st.session_state.question_scores.items(), key=lambda x: int(x[0][1:])):
+            report_lines.append(f"  {q}: {score:.2f}/5")
+        report_lines.append("")
+    
+    # Dimension Scores
+    if st.session_state.get('dimension_scores'):
+        report_lines.append("Dimension Averages:")
+        for dim, score in st.session_state.dimension_scores.items():
+            report_lines.append(f"  {dim}: {score:.2f}/5")
+        report_lines.append("")
+    
+    # Overall Classification
+    report_lines.append("OVERALL CLASSIFICATION")
+    report_lines.append("-" * 40)
+    report_lines.append(f"Overall Score: {st.session_state.get('overall_score', 0):.2f}/5")
+    report_lines.append(f"Hardness Level: {st.session_state.get('hardness_level', 'N/A')}")
+    report_lines.append("")
+    
+    return "\n".join(report_lines)
+
 # -----------------------------
 # Session State Initialization
 # -----------------------------
@@ -1692,7 +1835,7 @@ def init_session_state():
         "pain_points_text": "",
         "hardness_summary_text": "",
         "show_vocabulary": False,
-        "industry_updated": False  # ADDED: For tracking industry updates
+        "industry_updated": False
     }
     
     for key, default_value in defaults.items():
@@ -1701,22 +1844,16 @@ def init_session_state():
 
 init_session_state()
 
-
 def reset_app_state():
     """Reset session state to defaults for a new analysis."""
-    # Store only the essential page state
     preserved_page = st.session_state.get('current_page', 'page1')
     
-    # Clear all session state
     st.session_state.clear()
     
-    # Re-initialize with defaults
     init_session_state()
     
-    # Restore the page but keep default selections
     st.session_state.current_page = preserved_page
     
-    # Ensure dropdowns show correct default values
     st.session_state.account = 'Select Account'
     st.session_state.industry = 'Select Industry'
     st.session_state.problem_text = ''
@@ -1741,8 +1878,8 @@ def reset_app_state():
     st.session_state.hardness_summary_text = ''
     st.session_state.industry_updated = False
     
-    # Use success message without rerun to avoid double execution
     st.success("🔄 Application state reset. You can start a new analysis.")
+
 # -----------------------------
 # PAGE 1: Business Problem Input & Analysis
 # -----------------------------
@@ -1762,20 +1899,37 @@ if st.session_state.current_page == "page1":
     </div>
     """, unsafe_allow_html=True)
     
-    # Account & Industry Selection - FIXED WITH PROPER DROPDOWN UPDATES
+    # TOP NAVIGATION BUTTONS - Consistent 3-column layout
+    st.markdown('<div class="navigation-buttons">', unsafe_allow_html=True)
+    col1, col2, col3 = st.columns([1, 2, 1])
+    
+    with col1:
+        # Back button (disabled on main page)
+        st.markdown('')
+    
+    with col3:
+        # View In Detail button (will be enabled after analysis)
+        if st.session_state.analysis_complete:
+            if st.button("🔍 View In Detail →", key="in_detail_top", use_container_width=True, type="primary"):
+                st.session_state.current_page = "page2"
+                st.rerun()
+        else:
+            st.markdown('<div class="nav-button" style="opacity: 0.6; cursor: not-allowed;">🔍 View In Detail →</div>', unsafe_allow_html=True)
+    
+    st.markdown('</div>', unsafe_allow_html=True)
+    
+    # Account & Industry Selection
     st.markdown('<div class="section-title-box"><h3>🏢 Account & Industry Selection</h3></div>', unsafe_allow_html=True)
     
     col1, col2 = st.columns(2)
     
     with col1:
-        # Get current account safely
         current_account = st.session_state.get('account', 'Select Account')
         try:
             current_account_index = ACCOUNTS.index(current_account)
         except (ValueError, AttributeError):
             current_account_index = 0
         
-        # Account selector - use key to track changes
         selected_account = st.selectbox(
             "Select Account:",
             options=ACCOUNTS,
@@ -1783,28 +1937,22 @@ if st.session_state.current_page == "page1":
             key="account_selector"
         )
         
-        # Update session state immediately when account changes
         if selected_account != st.session_state.get('account'):
             st.session_state.account = selected_account
-            # Auto-map industry when account changes
             if selected_account in ACCOUNT_INDUSTRY_MAP:
                 st.session_state.industry = ACCOUNT_INDUSTRY_MAP[selected_account]
-                # Force update the industry dropdown by using a unique key
                 st.session_state.industry_updated = True
             st.rerun()
 
     with col2:
-        # Get current industry safely - this will reflect the auto-mapped value
         current_industry = st.session_state.get('industry', 'Select Industry')
         try:
             current_industry_index = INDUSTRIES.index(current_industry)
         except (ValueError, AttributeError):
             current_industry_index = 0
         
-        # Create a unique key for industry selector that changes when industry updates
         industry_key = f"industry_selector_{current_industry}"
         
-        # Industry selector - use dynamic key to force update
         selected_industry = st.selectbox(
             "Industry:",
             options=INDUSTRIES,
@@ -1813,12 +1961,11 @@ if st.session_state.current_page == "page1":
             disabled=(st.session_state.get('account', 'Select Account') == "Select Account")
         )
         
-        # Update session state immediately when industry changes
         if selected_industry != st.session_state.get('industry'):
             st.session_state.industry = selected_industry
             st.rerun()
 
-    # Display current selections for user feedback
+    # Display current selections
     if st.session_state.get('account') != 'Select Account' and st.session_state.get('industry') != 'Select Industry':
         st.markdown(f"""
         <div style="background: rgba(139, 30, 30, 0.05); padding: 1rem; border-radius: 12px; margin-bottom: 1rem; border-left: 4px solid var(--accent-orange);">
@@ -1831,7 +1978,6 @@ if st.session_state.current_page == "page1":
     # Business Problem Description
     st.markdown('<div class="section-title-box"><h3>📝 Business Problem Description</h3></div>', unsafe_allow_html=True)
     
-    # Initialize problem_text if not exists
     if 'problem_text' not in st.session_state:
         st.session_state.problem_text = ""
     
@@ -1859,22 +2005,19 @@ if st.session_state.current_page == "page1":
         )
     
     with col2:
-        # Vocabulary Button - only show after analysis
         if st.session_state.analysis_complete:
             vocab_label = "📚 Hide Vocabulary" if st.session_state.get('show_vocabulary', False) else "📚 View Vocabulary"
             if st.button(vocab_label, use_container_width=True, type="secondary", key="vocab_btn"):
                 st.session_state.show_vocabulary = not st.session_state.get('show_vocabulary', False)
                 st.rerun()
         else:
-            # Placeholder to maintain layout
             st.button("📚 Vocabulary", use_container_width=True, disabled=True)
     
     with col3:
-        # Reset button
         if st.button("🔄 Reset", use_container_width=True, type="secondary", key="reset_btn"):
             reset_app_state()
     
-    # Display vocabulary when toggled - COMPACT VERSION
+    # Display vocabulary when toggled
     if st.session_state.analysis_complete and st.session_state.get('show_vocabulary', False):
         vocab_text = st.session_state.outputs.get('vocabulary', 'No vocabulary data available')
         formatted_vocab = format_vocabulary_with_bold(vocab_text)
@@ -1887,7 +2030,6 @@ if st.session_state.current_page == "page1":
         ''', unsafe_allow_html=True)
     
     if analyze_btn:
-        # Validate inputs
         if not st.session_state.problem_text.strip():
             st.error("❌ Please enter a business problem description.")
             st.stop()
@@ -1925,7 +2067,6 @@ if st.session_state.current_page == "page1":
             total_apis = len(API_CONFIGS)
             session = requests.Session()
             
-            # Interesting analysis messages
             analysis_messages = [
                 "🔍 Extracting key vocabulary and terminology...",
                 "📊 Analyzing current system architecture...",
@@ -1948,7 +2089,6 @@ if st.session_state.current_page == "page1":
                 progress = (i / total_apis)
                 progress_bar.progress(progress)
                 
-                # Show interesting messages with progress
                 if i < len(analysis_messages):
                     status_text.info(f"{analysis_messages[i]} ({i+1}/{total_apis} completed)")
                 else:
@@ -2021,7 +2161,7 @@ if st.session_state.current_page == "page1":
             # Extract FULL SME Justification
             st.session_state.summary = extract_full_sme_justification(hardness_summary)
             
-            # Extract current system details with improved parsing
+            # Extract current system details
             current_system_text = st.session_state.outputs.get('current_system', '')
             sections = extract_current_system_sections(current_system_text)
             st.session_state.current_system_full = sections["current_system"]
@@ -2030,7 +2170,7 @@ if st.session_state.current_page == "page1":
             st.session_state.pain_points_text = sections["pain_points"]
             
             st.session_state.analysis_complete = True
-            st.session_state.show_vocabulary = False  # Reset vocabulary toggle
+            st.session_state.show_vocabulary = False
             st.rerun()
     
     # Display Results
@@ -2079,10 +2219,9 @@ if st.session_state.current_page == "page1":
                 </div>
                 ''', unsafe_allow_html=True)
         
-        # SME Justification Section - FULL CONTENT in orange-bordered box
+        # SME Justification Section
         st.markdown('<div class="section-title-box"><h3>🧠 SME Justification</h3></div>', unsafe_allow_html=True)
 
-        # Prefer extracting the full SME Justification from the raw hardness_summary_text to avoid trimmed paragraphs
         full_hs = st.session_state.get('hardness_summary_text', '')
         full_sme = ''
         if full_hs and full_hs.strip():
@@ -2095,32 +2234,56 @@ if st.session_state.current_page == "page1":
         else:
             st.markdown('<div class="info-card">SME Justification not available.</div>', unsafe_allow_html=True)
 
-        # Large In Detail Button
+        # BOTTOM NAVIGATION BUTTONS - Consistent 3-column layout
         st.markdown("---")
-        if st.button("🔍 View In Detail Analysis →", key="in_detail_main", use_container_width=True, type="primary"):
-            st.session_state.current_page = "page2"
-            st.rerun()
+        st.markdown('<div class="navigation-buttons">', unsafe_allow_html=True)
+        col1, col2, col3 = st.columns([1, 2, 1])
+        
+        with col1:
+            # Back button (disabled on main page)
+            st.markdown('')
+        
+        with col3:
+            # View In Detail button
+            if st.button("🔍 View In Detail Analysis →", key="in_detail_bottom", use_container_width=True, type="primary"):
+                st.session_state.current_page = "page2"
+                st.rerun()
+        
+        st.markdown('</div>', unsafe_allow_html=True)
+
 # -----------------------------
-# PAGE 2: Current System & Pain Points - IMPROVED LAYOUT
+# PAGE 2: Current System & Pain Points
 # -----------------------------
-if st.session_state.current_page == "page2":
+elif st.session_state.current_page == "page2":
     st.markdown('<div class="page-title"><h1>Current System & Pain Points</h1></div>', unsafe_allow_html=True)
 
-    # Business Problem in text area style box
+    # TOP NAVIGATION BUTTONS
+    st.markdown('<div class="navigation-buttons">', unsafe_allow_html=True)
+    col1, col2, col3 = st.columns([1, 2, 1])
+    
+    with col1:
+        if st.button("← Back to Analysis", key="back_page2_top", use_container_width=True):
+            st.session_state.current_page = "page1"
+            st.rerun()
+    
+    with col3:
+        if st.button("View Dimensions →", key="dimensions_top", use_container_width=True, type="primary"):
+            st.session_state.current_page = "dimension_volatility"
+            st.rerun()
+    
+    st.markdown('</div>', unsafe_allow_html=True)
+
+    # Business Problem
     st.markdown('<div class="section-title-box"><h3>Business Problem</h3></div>', unsafe_allow_html=True)
     st.markdown(f'<div class="problem-display"><p>{st.session_state.problem_text}</p></div>', unsafe_allow_html=True)
 
-    if st.button("← Back to Analysis", use_container_width=False):
-        st.session_state.current_page = "page1"
-        st.rerun()
-
-    # Current System - in info-card (white background)
+    # Current System
     if st.session_state.current_system_full and st.session_state.current_system_full.strip():
         st.markdown('<div class="section-title-box"><h3>1. Current System</h3></div>', unsafe_allow_html=True)
         formatted_text = st.session_state.current_system_full.replace('\n', '<br>')
         st.markdown(f'<div class="info-card">{formatted_text}</div>', unsafe_allow_html=True)
 
-    # Inputs & Outputs - Side by side in columns with info-cards
+    # Inputs & Outputs
     col1, col2 = st.columns(2)
     
     with col1:
@@ -2141,7 +2304,7 @@ if st.session_state.current_page == "page2":
             st.markdown('<div class="section-title-box"><h3>3. Output</h3></div>', unsafe_allow_html=True)
             st.markdown('<div class="info-card">No output information available</div>', unsafe_allow_html=True)
 
-    # Pain Points - in info-card (white background)
+    # Pain Points
     if st.session_state.pain_points_text and st.session_state.pain_points_text.strip():
         st.markdown('<div class="section-title-box"><h3>4. Pain Points</h3></div>', unsafe_allow_html=True)
         formatted_pain = st.session_state.pain_points_text.replace('\n', '<br>')
@@ -2150,16 +2313,13 @@ if st.session_state.current_page == "page2":
         st.markdown('<div class="section-title-box"><h3>4. Pain Points</h3></div>', unsafe_allow_html=True)
         st.markdown('<div class="info-card">No pain points identified</div>', unsafe_allow_html=True)
 
-    # Dimension Scores Section - REMOVED COMPREHENSIVE ANALYSIS HEADING
+    # Dimension Scores Section
     st.markdown('<div class="section-title-box"><h3>Dimension Analysis</h3></div>', unsafe_allow_html=True)
     
-    # Make the click text visible
     st.markdown('<div class="dimension-click-text">Click dimension boxes to view detailed analysis</div>', unsafe_allow_html=True)
 
     col1, col2 = st.columns(2)
-    col1, col2 = st.columns(2)
     dimensions = ["Volatility", "Ambiguity", "Interconnectedness", "Uncertainty"]
-    # Icons removed to avoid colored emoji rendering; using neutral placeholders instead
     dimension_icons = ["", "", "", ""]
 
     for i, dimension in enumerate(dimensions):
@@ -2175,11 +2335,22 @@ if st.session_state.current_page == "page2":
                 st.session_state.current_page = f"dimension_{dimension.lower()}"
                 st.rerun()
 
-    # Navigation
+    # BOTTOM NAVIGATION BUTTONS
     st.markdown("---")
-    if st.button("📊 View Hardness Summary →", use_container_width=True, type="primary"):
-        st.session_state.current_page = "hardness_summary"
-        st.rerun()
+    st.markdown('<div class="navigation-buttons">', unsafe_allow_html=True)
+    col1, col2, col3 = st.columns([1, 2, 1])
+    
+    with col1:
+        if st.button("← Back to Analysis", key="back_page2_bottom", use_container_width=True):
+            st.session_state.current_page = "page1"
+            st.rerun()
+    
+    with col3:
+        if st.button("📊 View Hardness Summary →", key="summary_bottom", use_container_width=True, type="primary"):
+            st.session_state.current_page = "hardness_summary"
+            st.rerun()
+    
+    st.markdown('</div>', unsafe_allow_html=True)
 
 # -----------------------------
 # DIMENSION DETAIL PAGES
@@ -2195,14 +2366,39 @@ elif st.session_state.current_page.startswith("dimension_"):
     
     st.markdown(f'<div class="page-title"><h1>{dimension_icons.get(dimension_name, "")} {dimension_name} Analysis</h1></div>', unsafe_allow_html=True)
     
-    # Business Problem - in problem-display box (text area style)
+    # TOP NAVIGATION BUTTONS
+    st.markdown('<div class="navigation-buttons">', unsafe_allow_html=True)
+    col1, col2, col3 = st.columns([1, 2, 1])
+    
+    with col1:
+        if st.button("← Back to System Overview", key=f"back_{dimension_name}", use_container_width=True):
+            st.session_state.current_page = "page2"
+            st.rerun()
+    
+    with col3:
+        # Next button logic
+        if dimension_name == "Volatility":
+            if st.button("Next → Ambiguity", key=f"next_{dimension_name}", use_container_width=True, type="primary"):
+                st.session_state.current_page = "dimension_ambiguity"
+                st.rerun()
+        elif dimension_name == "Ambiguity":
+            if st.button("Next → Interconnectedness", key=f"next_{dimension_name}", use_container_width=True, type="primary"):
+                st.session_state.current_page = "dimension_interconnectedness"
+                st.rerun()
+        elif dimension_name == "Interconnectedness":
+            if st.button("Next → Uncertainty", key=f"next_{dimension_name}", use_container_width=True, type="primary"):
+                st.session_state.current_page = "dimension_uncertainty"
+                st.rerun()
+        elif dimension_name == "Uncertainty":
+            if st.button("View Hardness Summary →", key=f"next_{dimension_name}", use_container_width=True, type="primary"):
+                st.session_state.current_page = "hardness_summary"
+                st.rerun()
+    
+    st.markdown('</div>', unsafe_allow_html=True)
+    
+    # Business Problem
     st.markdown('<div class="section-title-box"><h3>Business Problem</h3></div>', unsafe_allow_html=True)
     st.markdown(f'<div class="problem-display"><p>{st.session_state.problem_text}</p></div>', unsafe_allow_html=True)
-    
-    # Back button
-    if st.button("← Back to System Overview", use_container_width=False):
-        st.session_state.current_page = "page2"
-        st.rerun()
     
     # Display dimension score
     score = st.session_state.dimension_scores.get(dimension_name, 0.0)
@@ -2213,7 +2409,7 @@ elif st.session_state.current_page.startswith("dimension_"):
     </div>
     ''', unsafe_allow_html=True)
     
-    # Display Q&A for this dimension - in qa-boxes
+    # Display Q&A for this dimension
     st.markdown('<div class="section-title-box"><h3>Detailed Analysis</h3></div>', unsafe_allow_html=True)
     
     questions = DIMENSION_QUESTIONS.get(dimension_name, [])
@@ -2222,35 +2418,40 @@ elif st.session_state.current_page.startswith("dimension_"):
         answer_text = st.session_state.outputs.get(q_name, "No analysis available")
         clean_answer = sanitize_text(answer_text)
         
-        # Get the question description
         q_description = next((api["description"] for api in API_CONFIGS if api["name"] == q_name), q_name)
         
         st.markdown(f'<div class="qa-box"><div class="qa-question">{q_description}</div><div class="qa-answer">{clean_answer.replace(chr(10), "<br>")}</div></div>', unsafe_allow_html=True)
     
-    # Navigation buttons
+    # BOTTOM NAVIGATION BUTTONS
     st.markdown("---")
+    st.markdown('<div class="navigation-buttons">', unsafe_allow_html=True)
     col1, col2, col3 = st.columns([1, 2, 1])
     
-    if dimension_name == "Volatility":
-        with col3:
-            if st.button("Next → Ambiguity", use_container_width=True, type="primary"):
+    with col1:
+        if st.button("← Back to System Overview", key=f"back_bottom_{dimension_name}", use_container_width=True):
+            st.session_state.current_page = "page2"
+            st.rerun()
+    
+    with col3:
+        # Next button logic (same as top)
+        if dimension_name == "Volatility":
+            if st.button("Next → Ambiguity", key=f"next_bottom_{dimension_name}", use_container_width=True, type="primary"):
                 st.session_state.current_page = "dimension_ambiguity"
                 st.rerun()
-    elif dimension_name == "Ambiguity":
-        with col3:
-            if st.button("Next → Interconnectedness", use_container_width=True, type="primary"):
+        elif dimension_name == "Ambiguity":
+            if st.button("Next → Interconnectedness", key=f"next_bottom_{dimension_name}", use_container_width=True, type="primary"):
                 st.session_state.current_page = "dimension_interconnectedness"
                 st.rerun()
-    elif dimension_name == "Interconnectedness":
-        with col3:
-            if st.button("Next → Uncertainty", use_container_width=True, type="primary"):
+        elif dimension_name == "Interconnectedness":
+            if st.button("Next → Uncertainty", key=f"next_bottom_{dimension_name}", use_container_width=True, type="primary"):
                 st.session_state.current_page = "dimension_uncertainty"
                 st.rerun()
-    elif dimension_name == "Uncertainty":
-        with col3:
-            if st.button("View Hardness Summary →", use_container_width=True, type="primary"):
+        elif dimension_name == "Uncertainty":
+            if st.button("View Hardness Summary →", key=f"next_bottom_{dimension_name}", use_container_width=True, type="primary"):
                 st.session_state.current_page = "hardness_summary"
                 st.rerun()
+    
+    st.markdown('</div>', unsafe_allow_html=True)
 
 # -----------------------------
 # HARDNESS SUMMARY PAGE
@@ -2261,6 +2462,21 @@ elif st.session_state.current_page == "hardness_summary":
         <h1>Hardness Summary Analysis</h1>
     </div>
     ''', unsafe_allow_html=True)
+    
+    # TOP NAVIGATION BUTTONS
+    st.markdown('<div class="navigation-buttons">', unsafe_allow_html=True)
+    col1, col2, col3 = st.columns([1, 2, 1])
+    
+    with col1:
+        if st.button("← Back to Uncertainty", key="back_summary_top", use_container_width=True):
+            st.session_state.current_page = "dimension_uncertainty"
+            st.rerun()
+    
+    with col3:
+        # Download button will be in the main content
+        pass
+    
+    st.markdown('</div>', unsafe_allow_html=True)
     
     # Business Problem
     st.markdown('''
@@ -2274,11 +2490,6 @@ elif st.session_state.current_page == "hardness_summary":
         <p>{st.session_state.problem_text}</p>
     </div>
     ''', unsafe_allow_html=True)
-    
-    # Back button
-    if st.button("← Back to Uncertainty Analysis", use_container_width=False):
-        st.session_state.current_page = "dimension_uncertainty"
-        st.rerun()
     
     # Display Scores Summary
     st.markdown('''
@@ -2355,7 +2566,7 @@ elif st.session_state.current_page == "hardness_summary":
         </div>
         ''', unsafe_allow_html=True)
     
-    # Comprehensive Analysis (Everything EXCEPT scores and SME Justification)
+    # Comprehensive Analysis
     st.markdown('''
     <div class="section-title-box">
         <h3>📝 Comprehensive Analysis</h3>
@@ -2364,16 +2575,11 @@ elif st.session_state.current_page == "hardness_summary":
 
     if st.session_state.hardness_summary_text:
         hs_text = st.session_state.hardness_summary_text
-
-        # Extract the filtered comprehensive analysis (everything except score calculations and SME justification)
         comprehensive_analysis = extract_comprehensive_analysis(hs_text)
 
-        # If there's any content left after filtering, display it exactly as-is. This will include Summary/Key Takeaways
-        # if the API returned them (we don't strip them out here).
         if comprehensive_analysis and comprehensive_analysis.strip():
             st.markdown(f'<div class="info-card">{comprehensive_analysis}</div>', unsafe_allow_html=True)
         else:
-            # If nothing remains after removing calculations and SME Justification, show SME Justification as fallback
             sme = st.session_state.get('summary') or extract_full_sme_justification(hs_text)
             if sme:
                 st.markdown(f'<div class="info-card">{sme}</div>', unsafe_allow_html=True)
@@ -2382,164 +2588,33 @@ elif st.session_state.current_page == "hardness_summary":
     else:
         st.markdown('<div class="info-card">No hardness summary data available.</div>', unsafe_allow_html=True)
 
-    # Back to start button (always visible on the hardness_summary page)
+    # BOTTOM NAVIGATION BUTTONS
     st.markdown("---")
-    col1, col2 = st.columns([1, 1])
+    st.markdown('<div class="navigation-buttons">', unsafe_allow_html=True)
+    col1, col2, col3 = st.columns([1, 2, 1])
+    
     with col1:
-        if st.button("🏠 Back to Main Analysis", use_container_width=True, type="primary"):
+        if st.button("🏠 Back to Main Analysis", key="back_main_top", use_container_width=True, type="primary"):
             st.session_state.current_page = "page1"
             st.rerun()
+    
     with col2:
-        # Build a plain text report and provide a download button
-        report_lines = []
-        report_lines.append("Business Problem:\n")
-        report_lines.append(st.session_state.problem_text or "(no problem provided)")
-        report_lines.append("\n\nContext:\n")
-        report_lines.append(f"Industry: {st.session_state.get('industry','')}")
-        report_lines.append(f"\nAccount: {st.session_state.get('account','')}")
-        report_lines.append("\n\nCurrent System:\n")
-        report_lines.append(st.session_state.get('current_system_full','') or "No current system details")
-        report_lines.append("\n\nInputs:\n")
-        report_lines.append(st.session_state.get('input_text','') or "No inputs available")
-        report_lines.append("\n\nOutputs:\n")
-        report_lines.append(st.session_state.get('output_text','') or "No outputs available")
-        report_lines.append("\n\nPain Points:\n")
-        report_lines.append(st.session_state.get('pain_points_text','') or "No pain points identified")
-        report_lines.append("\n\nHardness Summary (raw):\n")
-        report_lines.append(st.session_state.get('hardness_summary_text','') or "No hardness summary available")
-
-        report_content = "\n".join(report_lines)
+        # Space for alignment
+        pass
+    
+    with col3:
+        # Download Report Button
+        report_content = create_download_report()
         try:
-            st.download_button(label="⬇️ Download Report (TXT)", data=report_content, file_name="hardness_report.txt", mime="text/plain")
+            st.download_button(
+                label="⬇️ Download Full Report", 
+                data=report_content, 
+                file_name=f"hardness_analysis_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt", 
+                mime="text/plain",
+                use_container_width=True,
+                type="primary"
+            )
         except Exception:
-            st.markdown("<div class='info-card'>Unable to create download at this time.</div>", unsafe_allow_html=True)
-
-# Mu-Sigma Logo - Base64 Version (Guaranteed to Work)
-st.markdown("""
-<style>
-/* Mu-Sigma Logo Styles */
-.musigma-logo {
-    position: fixed;
-    top: 14px;
-    right: 14px;
-    width: 80px;
-    height: 80px;
-    border-radius: 10px;
-    border: 2px solid rgba(255,255,255,0.9);
-    box-shadow: 0 8px 28px rgba(0,0,0,0.18);
-    z-index: 999999;
-    background: white !important;
-    opacity: 0.99;
-    transition: transform 0.15s ease, box-shadow 0.15s ease;
-    overflow: hidden;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.musigma-logo:hover { 
-    transform: translateY(-4px) scale(1.02); 
-    box-shadow: 0 12px 36px rgba(0,0,0,0.22);
-}
-
-@media (max-width: 640px) { 
-    .musigma-logo { 
-        display: none !important; 
-    } 
-}
-
-.musigma-logo img {
-    width: 100% !important;
-    height: 100% !important;
-    object-fit: contain !important;
-    display: block !important;
-    background: white !important;
-    padding: 8px !important;
-    border-radius: 6px !important;
-}
-
-.musigma-logo-link {
-    text-decoration: none !important;
-    display: inline-block !important;
-}
-
-/* Ensure logo stays on top */
-[data-testid="stAppViewContainer"] .musigma-logo {
-    z-index: 999999 !important;
-}
-</style>
-""", unsafe_allow_html=True)
-
-# Mu-Sigma Logo with working URL
-st.markdown(f'''
-<a href="#" class="musigma-logo-link">
-    <div class="musigma-logo">
-        <img src="https://yt3.googleusercontent.com/ytc/AIdro_k-7HkbByPWjKpVPO3LCF8XYlKuQuwROO0vf3zo1cqgoaE=s900-c-k-c0x00ffffff-no-rj" alt="Mu-Sigma Logo">
-    </div>
-</a>
-''', unsafe_allow_html=True)
-
-# Alternative: If URLs don't work, use this SVG version instead
-st.markdown("""
-<script>
-// Check if logo loaded properly after 2 seconds
-setTimeout(function() {
-    const logo = document.querySelector('.musigma-logo img');
-    if (logo && (logo.naturalWidth === 0 || logo.complete === false)) {
-        // Replace with SVG fallback
-        const logoContainer = document.querySelector('.musigma-logo');
-        if (logoContainer) {
-            logoContainer.innerHTML = `
-                <div class="musigma-text-fallback">
-                    μσ
-                </div>
-            `;
-        }
-    }
-}, 2000);
-</script>
-""", unsafe_allow_html=True)
-# Inject JS/CSS: hide logo when user scrolls down, animate on load, and show a temporary "Wow amazing!" bubble on clicks
-st.markdown('''
-<style>
-@keyframes logoPop { 0% { transform: translateY(-12px) scale(0.6); opacity:0 } 60% { transform: translateY(4px) scale(1.05); opacity:1 } 100% { transform: translateY(0) scale(1); opacity:1 } }
-@keyframes wowFloat { 0% { opacity: 1; transform: translateY(0) scale(1); } 100% { opacity: 0; transform: translateY(-24px) scale(1.06); } }
-.wow-bubble { position: fixed; pointer-events: none; background: #8b1e1e; color: #fff; padding: 8px 12px; border-radius: 20px; font-weight:700; font-family: Inter, sans-serif; box-shadow: 0 8px 20px rgba(0,0,0,0.18); z-index: 99999; animation: wowFloat 1.1s ease forwards; transform-origin: center; }
-</style>
-<script>
-(function(){
-    try{
-        const logo = document.querySelector('.musigma-logo');
-        if(logo){
-            // initial pop animation
-            logo.style.animation = 'logoPop 0.6s ease forwards';
-            logo.style.transition = 'opacity 0.18s ease, transform 0.18s ease';
-            // ensure visible when at top
-            if(window.scrollY > 50){ logo.style.opacity = '0'; logo.style.pointerEvents='none'; }
-            window.addEventListener('scroll', function(){
-                if(window.scrollY > 50){ logo.style.opacity = '0'; logo.style.pointerEvents='none'; logo.style.transform='translateY(-10px) scale(0.98)'; }
-                else { logo.style.opacity = '1'; logo.style.pointerEvents='auto'; logo.style.transform='translateY(0) scale(1)'; }
-            }, {passive:true});
-        }
-
-        // Click-triggered bubble
-        document.addEventListener('click', function(e){
-            try{
-                const bubble = document.createElement('div');
-                bubble.className = 'wow-bubble';
-                bubble.textContent = 'Wow amazing!';
-                document.body.appendChild(bubble);
-                // position with some offset so it doesn't sit directly under cursor
-                const x = Math.max(8, Math.min(window.innerWidth - 120, e.clientX - 50));
-                const y = Math.max(8, Math.min(window.innerHeight - 40, e.clientY - 30));
-                bubble.style.left = x + 'px';
-                bubble.style.top = y + 'px';
-                setTimeout(function(){ if(bubble && bubble.parentNode){ bubble.parentNode.removeChild(bubble); } }, 1200);
-            } catch(err){ console.error(err); }
-        }, false);
-    } catch(e){ console.error(e); }
-})();
-</script>
-''', unsafe_allow_html=True)
-
-
+            st.markdown('<div class="info-card">Unable to create download at this time.</div>', unsafe_allow_html=True)
+    
+    st.markdown('</div>', unsafe_allow_html=True)
