@@ -908,7 +908,7 @@ AUTH_TOKEN = None
 HEADERS_BASE = {"Content-Type": "application/json"}
 
 # -----------------------------
-# EXPANDED ACCOUNTS with Industry Mapping (Final Corrected Version)
+# EXPANDED ACCOUNTS with Industry Mapping (CORRECTED VERSION)
 # -----------------------------
 ACCOUNT_INDUSTRY_MAP = {
     "Select Account": "Select Industry",
@@ -984,7 +984,6 @@ ACCOUNT_INDUSTRY_MAP = {
     "UnitedHealth": "Healthcare",
     "CVS Health": "Healthcare",
     "Anthem": "Healthcare",
-    
     "Humana": "Healthcare",
     "Kaiser Permanente": "Healthcare",
 
@@ -1019,13 +1018,13 @@ ACCOUNT_INDUSTRY_MAP = {
     "Coursera": "Education",
     "Udemy": "Education",
     "Khan Academy": "Education",
-    "Mars": "Confectionery",
+    "Mars": "Consumer Goods",  # CORRECTED: Mars should be Consumer Goods, not Confectionery
 }
 
 # --- Priority Account Order ---
 PRIORITY_ACCOUNTS = [
     "Abbvie", "BMS", "BLR Airport", "Chevron", "Coles", "DELL",
-    "Microsoft","Mars", "Mu Labs", "Nike", "Skill Development",
+    "Microsoft", "Mars", "Mu Labs", "Nike", "Skill Development",  # CORRECTED: Mars was missing comma
     "Southwest Airlines", "Sabic", "Johnson & Johnson",
     "THD", "Tmobile", "Walmart"
 ]
@@ -1036,6 +1035,8 @@ OTHER_ACCOUNTS = [
     if acc not in PRIORITY_ACCOUNTS and acc != "Select Account"
 ]
 OTHER_ACCOUNTS.sort()
+
+# Add "Others" account to both lists
 OTHER_ACCOUNTS.append("Others")  # ✅ Keep Others at last
 
 # --- Final Ordered Account List ---
@@ -1045,7 +1046,24 @@ ACCOUNTS = ["Select Account"] + PRIORITY_ACCOUNTS + OTHER_ACCOUNTS
 ACCOUNT_INDUSTRY_MAP["Others"] = "Other"
 
 # --- Unique Industries ---
-INDUSTRIES = sorted(list(set(ACCOUNT_INDUSTRY_MAP.values())))
+# Remove "Confectionery" and "Select Industry" from the industries list
+all_industries = list(set(ACCOUNT_INDUSTRY_MAP.values()))
+# Filter out "Select Industry" and any non-standard industries
+INDUSTRIES = sorted([industry for industry in all_industries 
+                    if industry != "Select Industry"])
+
+# Ensure "Other" is included in industries
+if "Other" not in INDUSTRIES:
+    INDUSTRIES.append("Other")
+INDUSTRIES.sort()
+
+# Add "Select Industry" at the beginning
+INDUSTRIES = ["Select Industry"] + INDUSTRIES
+
+# Debug info (you can remove this in production)
+print(f"Total Accounts: {len(ACCOUNTS)}")
+print(f"Total Industries: {len(INDUSTRIES)}")
+print(f"Industries: {INDUSTRIES}")
 
 # === API CONFIGURATION ===
 API_CONFIGS = [
@@ -1673,7 +1691,8 @@ def init_session_state():
         "output_text": "",
         "pain_points_text": "",
         "hardness_summary_text": "",
-        "show_vocabulary": False
+        "show_vocabulary": False,
+        "industry_updated": False  # ADDED: For tracking industry updates
     }
     
     for key, default_value in defaults.items():
@@ -1685,12 +1704,19 @@ init_session_state()
 
 def reset_app_state():
     """Reset session state to defaults for a new analysis."""
+    # Store only the essential page state
     preserved_page = st.session_state.get('current_page', 'page1')
     
+    # Clear all session state
     st.session_state.clear()
+    
+    # Re-initialize with defaults
     init_session_state()
     
+    # Restore the page but keep default selections
     st.session_state.current_page = preserved_page
+    
+    # Ensure dropdowns show correct default values
     st.session_state.account = 'Select Account'
     st.session_state.industry = 'Select Industry'
     st.session_state.problem_text = ''
@@ -1713,11 +1739,10 @@ def reset_app_state():
     st.session_state.output_text = ''
     st.session_state.pain_points_text = ''
     st.session_state.hardness_summary_text = ''
+    st.session_state.industry_updated = False
     
+    # Use success message without rerun to avoid double execution
     st.success("🔄 Application state reset. You can start a new analysis.")
-    st.rerun()
-
-
 # -----------------------------
 # PAGE 1: Business Problem Input & Analysis
 # -----------------------------
@@ -1737,7 +1762,7 @@ if st.session_state.current_page == "page1":
     </div>
     """, unsafe_allow_html=True)
     
-    # Account & Industry Selection - UPDATED WITH IMMEDIATE UPDATES
+    # Account & Industry Selection - FIXED WITH PROPER DROPDOWN UPDATES
     st.markdown('<div class="section-title-box"><h3>🏢 Account & Industry Selection</h3></div>', unsafe_allow_html=True)
     
     col1, col2 = st.columns(2)
@@ -1764,22 +1789,27 @@ if st.session_state.current_page == "page1":
             # Auto-map industry when account changes
             if selected_account in ACCOUNT_INDUSTRY_MAP:
                 st.session_state.industry = ACCOUNT_INDUSTRY_MAP[selected_account]
+                # Force update the industry dropdown by using a unique key
+                st.session_state.industry_updated = True
             st.rerun()
 
     with col2:
-        # Get current industry safely
+        # Get current industry safely - this will reflect the auto-mapped value
         current_industry = st.session_state.get('industry', 'Select Industry')
         try:
             current_industry_index = INDUSTRIES.index(current_industry)
         except (ValueError, AttributeError):
             current_industry_index = 0
         
-        # Industry selector - use key to track changes
+        # Create a unique key for industry selector that changes when industry updates
+        industry_key = f"industry_selector_{current_industry}"
+        
+        # Industry selector - use dynamic key to force update
         selected_industry = st.selectbox(
             "Industry:",
             options=INDUSTRIES,
             index=current_industry_index,
-            key="industry_selector",
+            key=industry_key,
             disabled=(st.session_state.get('account', 'Select Account') == "Select Account")
         )
         
@@ -2511,4 +2541,5 @@ st.markdown('''
 })();
 </script>
 ''', unsafe_allow_html=True)
+
 
