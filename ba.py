@@ -1673,9 +1673,7 @@ def init_session_state():
         "output_text": "",
         "pain_points_text": "",
         "hardness_summary_text": "",
-        # ADD THESE FOR AUTO-MAPPING
-        "selected_account": "Select Account",
-        "selected_industry": "Select Industry"
+        "show_vocabulary": False  # Add this
     }
     
     for key, default_value in defaults.items():
@@ -1687,24 +1685,16 @@ init_session_state()
 
 def reset_app_state():
     """Reset session state to defaults for a new analysis."""
-    # Preserve only the current page so the UI doesn't unexpectedly navigate away
     preserved_page = st.session_state.get('current_page', 'page1')
-
-    # Clear everything and reinitialize defaults
+    
     st.session_state.clear()
     init_session_state()
-
-    # Restore page and reset user-visible inputs to defaults
+    
     st.session_state.current_page = preserved_page
     st.session_state.account = 'Select Account'
     st.session_state.industry = 'Select Industry'
     st.session_state.problem_text = ''
     st.session_state.account_input = ''
-    # RESET AUTO-MAPPING VARIABLES
-    st.session_state.selected_account = 'Select Account'
-    st.session_state.selected_industry = 'Select Industry'
-
-    # Clear analysis outputs and derived fields
     st.session_state.outputs = {}
     st.session_state.analysis_complete = False
     st.session_state.show_vocabulary = False
@@ -1723,10 +1713,11 @@ def reset_app_state():
     st.session_state.output_text = ''
     st.session_state.pain_points_text = ''
     st.session_state.hardness_summary_text = ''
-
+    
     st.success("🔄 Application state reset. You can start a new analysis.")
-    # Trigger a rerun so the UI reflects the cleared state immediately
-    safe_rerun()
+    st.rerun()
+
+
 # -----------------------------
 # PAGE 1: Business Problem Input & Analysis
 # -----------------------------
@@ -1746,17 +1737,19 @@ if st.session_state.current_page == "page1":
     </div>
     """, unsafe_allow_html=True)
     
-  # Account & Industry Selection
+    # Account & Industry Selection
     st.markdown('<div class="section-title-box"><h3>🏢 Account & Industry Selection</h3></div>', unsafe_allow_html=True)
     
     col1, col2 = st.columns(2)
     
     with col1:
+        # Get current index safely
         try:
             current_account_index = ACCOUNTS.index(st.session_state.account)
-        except:
+        except (ValueError, AttributeError):
             current_account_index = 0
         
+        # Account selector with unique key
         selected_account = st.selectbox(
             "Select Account:",
             options=ACCOUNTS,
@@ -1764,46 +1757,33 @@ if st.session_state.current_page == "page1":
             key="account_selector"
         )
         
-        # Auto-update industry when account changes
+        # Update industry immediately when account changes
         if selected_account != st.session_state.account:
             st.session_state.account = selected_account
-            # Map industry from account
+            # Auto-map industry
             mapped_industry = ACCOUNT_INDUSTRY_MAP.get(selected_account, "Select Industry")
             st.session_state.industry = mapped_industry
-            st.session_state.selected_account = selected_account
-            st.session_state.selected_industry = mapped_industry
             st.rerun()
     
     with col2:
+        # Get current industry index safely
         try:
             current_industry_index = INDUSTRIES.index(st.session_state.industry)
-        except:
+        except (ValueError, AttributeError):
             current_industry_index = 0
         
+        # Industry selector
         selected_industry = st.selectbox(
-            "Select Industry:",
+            "Industry:",
             options=INDUSTRIES,
             index=current_industry_index,
             key="industry_selector",
-            disabled=(st.session_state.account not in ["Select Account", "Others"])
+            disabled=(st.session_state.account != "Select Account")
         )
         
-        # Handle manual industry change (only when allowed)
-        if selected_industry != st.session_state.industry and st.session_state.account in ["Select Account", "Others"]:
+        # Update industry if manually changed
+        if selected_industry != st.session_state.industry:
             st.session_state.industry = selected_industry
-            st.session_state.selected_industry = selected_industry
-        else:
-            # Display auto-mapped industry (can still be manually changed)
-            selected_industry = st.selectbox(
-                "Industry:",
-                options=INDUSTRIES,
-                index=current_industry_index,
-                key="industry_selector_auto"
-            )
-            # Handle manual industry override
-            if selected_industry != st.session_state.selected_industry:
-                st.session_state.selected_industry = selected_industry
-                st.session_state.industry = selected_industry
     
     # Business Problem Description
     st.markdown('<div class="section-title-box"><h3>📝 Business Problem Description</h3></div>', unsafe_allow_html=True)
@@ -1827,6 +1807,7 @@ if st.session_state.current_page == "page1":
                          st.session_state.industry != "Select Industry" and 
                          st.session_state.account != "Select Account")
         )
+        
         # Reset button next to analyze
         if st.button("🔁 Reset", use_container_width=False, type="secondary"):
             reset_app_state()
@@ -1834,14 +1815,11 @@ if st.session_state.current_page == "page1":
     with col2:
         # Vocabulary Button - toggle functionality
         if st.session_state.analysis_complete:
-            if 'show_vocabulary' not in st.session_state:
-                st.session_state.show_vocabulary = False
-            
             if st.button("📚 View Vocabulary", use_container_width=True, type="secondary"):
-                st.session_state.show_vocabulary = not st.session_state.show_vocabulary
+                st.session_state.show_vocabulary = not st.session_state.get('show_vocabulary', False)
                 st.rerun()
     
-    # Display vocabulary when toggled - COMPACT VERSION
+    # Display vocabulary when toggled
     if st.session_state.analysis_complete and st.session_state.get('show_vocabulary', False):
         vocab_text = st.session_state.outputs.get('vocabulary', 'No vocabulary data available')
         formatted_vocab = format_vocabulary_with_bold(vocab_text)
@@ -1854,6 +1832,7 @@ if st.session_state.current_page == "page1":
         ''', unsafe_allow_html=True)
     
     if analyze_btn:
+        # [Rest of the analysis code remains the same - starting from full_problem_context...]
         full_problem_context = (
             f"The business problem is:\n{st.session_state.problem_text.strip()}\n\n"
             f"Context:\n"
@@ -1879,7 +1858,6 @@ if st.session_state.current_page == "page1":
             total_apis = len(API_CONFIGS)
             session = requests.Session()
             
-            # Interesting analysis messages
             analysis_messages = [
                 "🔍 Extracting key vocabulary and terminology...",
                 "📊 Analyzing current system architecture...",
@@ -1902,7 +1880,6 @@ if st.session_state.current_page == "page1":
                 progress = (i / total_apis)
                 progress_bar.progress(progress)
                 
-                # Show interesting messages with progress
                 if i < len(analysis_messages):
                     status_text.info(f"{analysis_messages[i]} ({i+1}/{total_apis} completed)")
                 else:
@@ -1953,11 +1930,9 @@ if st.session_state.current_page == "page1":
             hardness_summary = st.session_state.outputs.get('hardness_summary', '')
             st.session_state.hardness_summary_text = hardness_summary
             
-            # Extract Q1-Q12 scores
             question_scores = extract_individual_question_scores(hardness_summary)
             st.session_state.question_scores = question_scores
             
-            # Calculate dimension scores
             calculated_dimensions = calculate_dimension_scores_from_questions(question_scores)
             
             for dimension in ["Volatility", "Ambiguity", "Interconnectedness", "Uncertainty"]:
@@ -1966,16 +1941,10 @@ if st.session_state.current_page == "page1":
                 else:
                     st.session_state.dimension_scores[dimension] = 0.0
             
-            # Calculate overall score
             st.session_state.overall_score = calculate_overall_score_from_dimensions(st.session_state.dimension_scores)
-            
-            # Classify hardness
             st.session_state.hardness_level = classify_hardness_level(st.session_state.overall_score)
-            
-            # Extract FULL SME Justification
             st.session_state.summary = extract_full_sme_justification(hardness_summary)
             
-            # Extract current system details with improved parsing
             current_system_text = st.session_state.outputs.get('current_system', '')
             sections = extract_current_system_sections(current_system_text)
             st.session_state.current_system_full = sections["current_system"]
@@ -1984,7 +1953,7 @@ if st.session_state.current_page == "page1":
             st.session_state.pain_points_text = sections["pain_points"]
             
             st.session_state.analysis_complete = True
-            st.session_state.show_vocabulary = False  # Reset vocabulary toggle
+            st.session_state.show_vocabulary = False
             st.rerun()
     
     # Display Results
@@ -2022,7 +1991,6 @@ if st.session_state.current_page == "page1":
         
         col1, col2 = st.columns(2)
         dimensions = ["Volatility", "Ambiguity", "Interconnectedness", "Uncertainty"]
-        # Icons removed to avoid colored emoji rendering; using neutral placeholders instead
         dimension_icons = ["", "", "", ""]
         for i, dimension in enumerate(dimensions):
             with col1 if i < 2 else col2:
@@ -2034,10 +2002,9 @@ if st.session_state.current_page == "page1":
                 </div>
                 ''', unsafe_allow_html=True)
         
-        # SME Justification Section - FULL CONTENT in orange-bordered box
+        # SME Justification Section
         st.markdown('<div class="section-title-box"><h3>SME Justification</h3></div>', unsafe_allow_html=True)
 
-        # Prefer extracting the full SME Justification from the raw hardness_summary_text to avoid trimmed paragraphs
         full_hs = st.session_state.get('hardness_summary_text', '')
         full_sme = ''
         if full_hs and full_hs.strip():
@@ -2497,4 +2464,5 @@ st.markdown('''
 })();
 </script>
 ''', unsafe_allow_html=True)
+
 
