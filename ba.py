@@ -887,71 +887,55 @@ TENANT_ID = "talos"
 AUTH_TOKEN = None
 HEADERS_BASE = {"Content-Type": "application/json"}
 
-# -----------------------------
-# EXPANDED ACCOUNTS with Industry Mapping (Final Corrected Version)
-# -----------------------------
+# EXPANDED ACCOUNTS with Industry Mapping
 ACCOUNT_INDUSTRY_MAP = {
     "Select Account": "Select Industry",
-
-    # --- Priority Accounts (shown first) ---
+    # Pharmaceutical
     "Abbvie": "Pharma",
     "BMS": "Pharma",
-    "BLR Airport": "Other",
-    "Chevron": "Energy",
-    "Coles": "Retail",
-    "DELL": "Technology",
-    "Microsoft": "Technology",
-    "Mu Labs": "Technology",
-    "Nike": "Consumer Goods",
-    "Skill Development": "Education",
-    "Southwest Airlines": "Airlines",
-    "Sabic": "Energy",
-    "Johnson & Johnson": "Pharma",
-    "THD": "Retail",
-    "Tmobile": "Telecom",
-    "Walmart": "Retail",
-
-    # --- Rest of the Accounts ---
-    # Pharmaceutical
     "Pfizer": "Pharma",
+    "Johnson & Johnson": "Pharma",
     "Novartis": "Pharma",
     "Merck": "Pharma",
     "Roche": "Pharma",
-
     # Technology
+    "Microsoft": "Technology",
+    "DELL": "Technology",
     "IBM": "Technology",
     "Oracle": "Technology",
     "SAP": "Technology",
     "Salesforce": "Technology",
     "Adobe": "Technology",
-
     # Retail
+    "Walmart": "Retail",
     "Target": "Retail",
     "Costco": "Retail",
     "Kroger": "Retail",
+    "Coles": "Retail",
     "Tesco": "Retail",
     "Carrefour": "Retail",
-
+    "THD": "Retail",
     # Airlines
+    "Southwest Airlines": "Airlines",
     "Delta Airlines": "Airlines",
     "United Airlines": "Airlines",
     "American Airlines": "Airlines",
     "Emirates": "Airlines",
     "Lufthansa": "Airlines",
-
+    "BLR Airport": "Airlines",
     # Consumer Goods
+    "Nike": "Consumer Goods",
     "Adidas": "Consumer Goods",
     "Unilever": "Consumer Goods",
     "Procter & Gamble": "Consumer Goods",
     "Coca-Cola": "Consumer Goods",
     "PepsiCo": "Consumer Goods",
-
     # Energy
+    "Chevron": "Energy",
     "ExxonMobil": "Energy",
     "Shell": "Energy",
     "BP": "Energy",
     "TotalEnergies": "Energy",
-
     # Finance
     "JPMorgan Chase": "Finance",
     "Bank of America": "Finance",
@@ -959,71 +943,46 @@ ACCOUNT_INDUSTRY_MAP = {
     "Goldman Sachs": "Finance",
     "Morgan Stanley": "Finance",
     "Citigroup": "Finance",
-
     # Healthcare
     "UnitedHealth": "Healthcare",
     "CVS Health": "Healthcare",
     "Anthem": "Healthcare",
     "Humana": "Healthcare",
     "Kaiser Permanente": "Healthcare",
-
     # Logistics
     "FedEx": "Logistics",
     "UPS": "Logistics",
     "DHL": "Logistics",
     "Maersk": "Logistics",
     "Amazon Logistics": "Logistics",
-
     # E-commerce
     "Amazon": "E-commerce",
     "Alibaba": "E-commerce",
     "eBay": "E-commerce",
     "Shopify": "E-commerce",
     "Flipkart": "E-commerce",
-
     # Automotive
     "Tesla": "Automotive",
     "Ford": "Automotive",
     "General Motors": "Automotive",
     "Toyota": "Automotive",
     "Volkswagen": "Automotive",
-
     # Hospitality
     "Marriott": "Hospitality",
     "Hilton": "Hospitality",
     "Hyatt": "Hospitality",
     "Airbnb": "Hospitality",
-
     # Education
+    "Skill Development": "Education",
     "Coursera": "Education",
     "Udemy": "Education",
     "Khan Academy": "Education",
-    "Mars": "Confectionery",
+    # Other
+    "Tmobile": "Telecommunications",
+    "Mu Labs":"Other"
 }
 
-# --- Priority Account Order ---
-PRIORITY_ACCOUNTS = [
-    "Abbvie", "BMS", "BLR Airport", "Chevron", "Coles", "DELL",
-    "Microsoft","Mars", "Mu Labs", "Nike", "Skill Development",
-    "Southwest Airlines", "Sabic", "Johnson & Johnson",
-    "THD", "Tmobile", "Walmart"
-]
-
-# --- Add Remaining Accounts (Alphabetically), keeping 'Others' at the end ---
-OTHER_ACCOUNTS = [
-    acc for acc in ACCOUNT_INDUSTRY_MAP.keys()
-    if acc not in PRIORITY_ACCOUNTS and acc != "Select Account"
-]
-OTHER_ACCOUNTS.sort()
-OTHER_ACCOUNTS.append("Others")  # ✅ Keep Others at last
-
-# --- Final Ordered Account List ---
-ACCOUNTS = ["Select Account"] + PRIORITY_ACCOUNTS + OTHER_ACCOUNTS
-
-# --- Add 'Others' Industry mapping ---
-ACCOUNT_INDUSTRY_MAP["Others"] = "Other"
-
-# --- Unique Industries ---
+ACCOUNTS = sorted(list(ACCOUNT_INDUSTRY_MAP.keys()))
 INDUSTRIES = sorted(list(set(ACCOUNT_INDUSTRY_MAP.values())))
 
 # === API CONFIGURATION ===
@@ -2498,3 +2457,4 @@ st.markdown('''
 })();
 </script>
 ''', unsafe_allow_html=True)
+
