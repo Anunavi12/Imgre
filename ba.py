@@ -1673,9 +1673,7 @@ def init_session_state():
         "output_text": "",
         "pain_points_text": "",
         "hardness_summary_text": "",
-        # ADD THESE FOR AUTO-MAPPING
-        "selected_account": "Select Account",
-        "selected_industry": "Select Industry"
+        "show_vocabulary": False
     }
     
     for key, default_value in defaults.items():
@@ -1687,24 +1685,16 @@ init_session_state()
 
 def reset_app_state():
     """Reset session state to defaults for a new analysis."""
-    # Preserve only the current page so the UI doesn't unexpectedly navigate away
     preserved_page = st.session_state.get('current_page', 'page1')
-
-    # Clear everything and reinitialize defaults
+    
     st.session_state.clear()
     init_session_state()
-
-    # Restore page and reset user-visible inputs to defaults
+    
     st.session_state.current_page = preserved_page
     st.session_state.account = 'Select Account'
     st.session_state.industry = 'Select Industry'
     st.session_state.problem_text = ''
     st.session_state.account_input = ''
-    # RESET AUTO-MAPPING VARIABLES
-    st.session_state.selected_account = 'Select Account'
-    st.session_state.selected_industry = 'Select Industry'
-
-    # Clear analysis outputs and derived fields
     st.session_state.outputs = {}
     st.session_state.analysis_complete = False
     st.session_state.show_vocabulary = False
@@ -1723,10 +1713,11 @@ def reset_app_state():
     st.session_state.output_text = ''
     st.session_state.pain_points_text = ''
     st.session_state.hardness_summary_text = ''
-
+    
     st.success("🔄 Application state reset. You can start a new analysis.")
-    # Trigger a rerun so the UI reflects the cleared state immediately
-    safe_rerun()
+    st.rerun()
+
+
 # -----------------------------
 # PAGE 1: Business Problem Input & Analysis
 # -----------------------------
@@ -1752,56 +1743,46 @@ if st.session_state.current_page == "page1":
     col1, col2 = st.columns(2)
     
     with col1:
+        # Get current index safely
         try:
-            current_account_index = ACCOUNTS.index(st.session_state.selected_account)
-        except:
+            current_account_index = ACCOUNTS.index(st.session_state.account)
+        except (ValueError, AttributeError):
             current_account_index = 0
         
-        selected_account = st.selectbox(
+        # Account selector with on_change callback
+        def on_account_change():
+            selected = st.session_state.account_selector
+            st.session_state.account = selected
+            # Auto-map industry immediately
+            st.session_state.industry = ACCOUNT_INDUSTRY_MAP.get(selected, "Select Industry")
+        
+        st.selectbox(
             "Select Account:",
             options=ACCOUNTS,
             index=current_account_index,
-            key="account_selector_all"
+            key="account_selector",
+            on_change=on_account_change
         )
-        
-        # Auto-update industry when account changes
-        if selected_account != st.session_state.selected_account:
-            st.session_state.selected_account = selected_account
-            st.session_state.selected_industry = ACCOUNT_INDUSTRY_MAP.get(selected_account, "Select Industry")
-            # Also update the original session state variables for compatibility
-            st.session_state.account = selected_account
-            st.session_state.industry = st.session_state.selected_industry
-            st.rerun()
     
     with col2:
+        # Get current industry index safely
         try:
-            current_industry_index = INDUSTRIES.index(st.session_state.selected_industry)
-        except:
+            current_industry_index = INDUSTRIES.index(st.session_state.industry)
+        except (ValueError, AttributeError):
             current_industry_index = 0
         
-        if st.session_state.selected_account == "Select Account":
-            selected_industry = st.selectbox(
-                "Select Industry:",
-                options=INDUSTRIES,
-                index=current_industry_index,
-                key="industry_selector"
-            )
-            # Handle manual industry selection when no account is selected
-            if selected_industry != st.session_state.selected_industry:
-                st.session_state.selected_industry = selected_industry
-                st.session_state.industry = selected_industry
-        else:
-            # Display auto-mapped industry (can still be manually changed)
-            selected_industry = st.selectbox(
-                "Industry:",
-                options=INDUSTRIES,
-                index=current_industry_index,
-                key="industry_selector_auto"
-            )
-            # Handle manual industry override
-            if selected_industry != st.session_state.selected_industry:
-                st.session_state.selected_industry = selected_industry
-                st.session_state.industry = selected_industry
+        # Industry selector with on_change callback
+        def on_industry_change():
+            st.session_state.industry = st.session_state.industry_selector
+        
+        st.selectbox(
+            "Industry:",
+            options=INDUSTRIES,
+            index=current_industry_index,
+            key="industry_selector",
+            disabled=(st.session_state.account != "Select Account"),
+            on_change=on_industry_change
+        )
     
     # Business Problem Description
     st.markdown('<div class="section-title-box"><h3>📝 Business Problem Description</h3></div>', unsafe_allow_html=True)
@@ -1825,19 +1806,31 @@ if st.session_state.current_page == "page1":
                          st.session_state.industry != "Select Industry" and 
                          st.session_state.account != "Select Account")
         )
-        # Reset button next to analyze
+        
+        # Reset button
         if st.button("🔁 Reset", use_container_width=False, type="secondary"):
             reset_app_state()
     
     with col2:
-        # Vocabulary Button - toggle functionality
+        # Vocabulary Button
         if st.session_state.analysis_complete:
-            if 'show_vocabulary' not in st.session_state:
-                st.session_state.show_vocabulary = False
-            
             if st.button("📚 View Vocabulary", use_container_width=True, type="secondary"):
-                st.session_state.show_vocabulary = not st.session_state.show_vocabulary
+                st.session_state.show_vocabulary = not st.session_state.get('show_vocabulary', False)
                 st.rerun()
+    
+    # Display vocabulary when toggled
+    if st.session_state.analysis_complete and st.session_state.get('show_vocabulary', False):
+        vocab_text = st.session_state.outputs.get('vocabulary', 'No vocabulary data available')
+        formatted_vocab = format_vocabulary_with_bold(vocab_text)
+        
+        st.markdown(f'''
+        <div class="vocab-display">
+            <h4 style="color: var(--musigma-orange) !important; margin-bottom: 1rem; text-align: center;">Extracted Vocabulary</h4>
+            {formatted_vocab}
+        </div>
+        ''', unsafe_allow_html=True)
+    
+    # [Rest of your analyze_btn code remains exactly the same...]
     
     # Display vocabulary when toggled - COMPACT VERSION
     if st.session_state.analysis_complete and st.session_state.get('show_vocabulary', False):
