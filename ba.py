@@ -1746,14 +1746,14 @@ if st.session_state.current_page == "page1":
     </div>
     """, unsafe_allow_html=True)
     
-    # Account & Industry Selection
+  # Account & Industry Selection
     st.markdown('<div class="section-title-box"><h3>🏢 Account & Industry Selection</h3></div>', unsafe_allow_html=True)
     
     col1, col2 = st.columns(2)
     
     with col1:
         try:
-            current_account_index = ACCOUNTS.index(st.session_state.selected_account)
+            current_account_index = ACCOUNTS.index(st.session_state.account)
         except:
             current_account_index = 0
         
@@ -1761,35 +1761,37 @@ if st.session_state.current_page == "page1":
             "Select Account:",
             options=ACCOUNTS,
             index=current_account_index,
-            key="account_selector_all"
+            key="account_selector"
         )
         
         # Auto-update industry when account changes
-        if selected_account != st.session_state.selected_account:
-            st.session_state.selected_account = selected_account
-            st.session_state.selected_industry = ACCOUNT_INDUSTRY_MAP.get(selected_account, "Select Industry")
-            # Also update the original session state variables for compatibility
+        if selected_account != st.session_state.account:
             st.session_state.account = selected_account
-            st.session_state.industry = st.session_state.selected_industry
+            # Map industry from account
+            mapped_industry = ACCOUNT_INDUSTRY_MAP.get(selected_account, "Select Industry")
+            st.session_state.industry = mapped_industry
+            st.session_state.selected_account = selected_account
+            st.session_state.selected_industry = mapped_industry
             st.rerun()
     
     with col2:
         try:
-            current_industry_index = INDUSTRIES.index(st.session_state.selected_industry)
+            current_industry_index = INDUSTRIES.index(st.session_state.industry)
         except:
             current_industry_index = 0
         
-        if st.session_state.selected_account == "Select Account":
-            selected_industry = st.selectbox(
-                "Select Industry:",
-                options=INDUSTRIES,
-                index=current_industry_index,
-                key="industry_selector"
-            )
-            # Handle manual industry selection when no account is selected
-            if selected_industry != st.session_state.selected_industry:
-                st.session_state.selected_industry = selected_industry
-                st.session_state.industry = selected_industry
+        selected_industry = st.selectbox(
+            "Select Industry:",
+            options=INDUSTRIES,
+            index=current_industry_index,
+            key="industry_selector",
+            disabled=(st.session_state.account not in ["Select Account", "Others"])
+        )
+        
+        # Handle manual industry change (only when allowed)
+        if selected_industry != st.session_state.industry and st.session_state.account in ["Select Account", "Others"]:
+            st.session_state.industry = selected_industry
+            st.session_state.selected_industry = selected_industry
         else:
             # Display auto-mapped industry (can still be manually changed)
             selected_industry = st.selectbox(
@@ -2495,3 +2497,4 @@ st.markdown('''
 })();
 </script>
 ''', unsafe_allow_html=True)
+
