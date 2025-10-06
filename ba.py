@@ -1737,100 +1737,112 @@ if st.session_state.current_page == "page1":
     </div>
     """, unsafe_allow_html=True)
     
-    # Account & Industry Selection
+    # Account & Industry Selection - UPDATED WITH IMMEDIATE UPDATES
     st.markdown('<div class="section-title-box"><h3>🏢 Account & Industry Selection</h3></div>', unsafe_allow_html=True)
     
     col1, col2 = st.columns(2)
     
     with col1:
-        # Get current index safely
+        # Get current account safely
+        current_account = st.session_state.get('account', 'Select Account')
         try:
-            current_account_index = ACCOUNTS.index(st.session_state.account)
+            current_account_index = ACCOUNTS.index(current_account)
         except (ValueError, AttributeError):
             current_account_index = 0
         
-        # Account selector with on_change callback
-        def on_account_change():
-            selected = st.session_state.account_selector
-            st.session_state.account = selected
-            # Auto-map industry immediately
-            st.session_state.industry = ACCOUNT_INDUSTRY_MAP.get(selected, "Select Industry")
-        
-        st.selectbox(
+        # Account selector - use key to track changes
+        selected_account = st.selectbox(
             "Select Account:",
             options=ACCOUNTS,
             index=current_account_index,
-            key="account_selector",
-            on_change=on_account_change
+            key="account_selector"
         )
-    
+        
+        # Update session state immediately when account changes
+        if selected_account != st.session_state.get('account'):
+            st.session_state.account = selected_account
+            # Auto-map industry when account changes
+            if selected_account in ACCOUNT_INDUSTRY_MAP:
+                st.session_state.industry = ACCOUNT_INDUSTRY_MAP[selected_account]
+            st.rerun()
+
     with col2:
-        # Get current industry index safely
+        # Get current industry safely
+        current_industry = st.session_state.get('industry', 'Select Industry')
         try:
-            current_industry_index = INDUSTRIES.index(st.session_state.industry)
+            current_industry_index = INDUSTRIES.index(current_industry)
         except (ValueError, AttributeError):
             current_industry_index = 0
         
-        # Industry selector with on_change callback
-        def on_industry_change():
-            st.session_state.industry = st.session_state.industry_selector
-        
-        st.selectbox(
+        # Industry selector - use key to track changes
+        selected_industry = st.selectbox(
             "Industry:",
             options=INDUSTRIES,
             index=current_industry_index,
             key="industry_selector",
-            disabled=(st.session_state.account != "Select Account"),
-            on_change=on_industry_change
+            disabled=(st.session_state.get('account', 'Select Account') == "Select Account")
         )
+        
+        # Update session state immediately when industry changes
+        if selected_industry != st.session_state.get('industry'):
+            st.session_state.industry = selected_industry
+            st.rerun()
+
+    # Display current selections for user feedback
+    if st.session_state.get('account') != 'Select Account' and st.session_state.get('industry') != 'Select Industry':
+        st.markdown(f"""
+        <div style="background: rgba(139, 30, 30, 0.05); padding: 1rem; border-radius: 12px; margin-bottom: 1rem; border-left: 4px solid var(--accent-orange);">
+            <strong>Selected:</strong> 
+            <span style="color: var(--musigma-red); font-weight: 600;">{st.session_state.account}</span> | 
+            <span style="color: var(--accent-orange); font-weight: 600;">{st.session_state.industry}</span>
+        </div>
+        """, unsafe_allow_html=True)
     
     # Business Problem Description
     st.markdown('<div class="section-title-box"><h3>📝 Business Problem Description</h3></div>', unsafe_allow_html=True)
+    
+    # Initialize problem_text if not exists
+    if 'problem_text' not in st.session_state:
+        st.session_state.problem_text = ""
+    
     st.session_state.problem_text = st.text_area(
         "Describe your business problem in detail:",
         value=st.session_state.problem_text,
         height=200,
         placeholder="Enter a detailed description of your business challenge...",
-        label_visibility="collapsed"
+        label_visibility="collapsed",
+        key="problem_text_area"
     )
     
     # Analysis Button
-    col1, col2 = st.columns([3, 1])
+    col1, col2, col3 = st.columns([2, 1, 1])
     
     with col1:
         analyze_btn = st.button(
-            "Find Out How Hard It Is",
+            "🚀 Find Out How Hard It Is",
             type="primary",
             use_container_width=True,
             disabled=not (st.session_state.problem_text.strip() and 
                          st.session_state.industry != "Select Industry" and 
-                         st.session_state.account != "Select Account")
+                         st.session_state.account != "Select Account"),
+            key="analyze_btn"
         )
-        
-        # Reset button
-        if st.button("🔁 Reset", use_container_width=False, type="secondary"):
-            reset_app_state()
     
     with col2:
-        # Vocabulary Button
+        # Vocabulary Button - only show after analysis
         if st.session_state.analysis_complete:
-            if st.button("📚 View Vocabulary", use_container_width=True, type="secondary"):
+            vocab_label = "📚 Hide Vocabulary" if st.session_state.get('show_vocabulary', False) else "📚 View Vocabulary"
+            if st.button(vocab_label, use_container_width=True, type="secondary", key="vocab_btn"):
                 st.session_state.show_vocabulary = not st.session_state.get('show_vocabulary', False)
                 st.rerun()
+        else:
+            # Placeholder to maintain layout
+            st.button("📚 Vocabulary", use_container_width=True, disabled=True)
     
-    # Display vocabulary when toggled
-    if st.session_state.analysis_complete and st.session_state.get('show_vocabulary', False):
-        vocab_text = st.session_state.outputs.get('vocabulary', 'No vocabulary data available')
-        formatted_vocab = format_vocabulary_with_bold(vocab_text)
-        
-        st.markdown(f'''
-        <div class="vocab-display">
-            <h4 style="color: var(--musigma-orange) !important; margin-bottom: 1rem; text-align: center;">Extracted Vocabulary</h4>
-            {formatted_vocab}
-        </div>
-        ''', unsafe_allow_html=True)
-    
-    # [Rest of your analyze_btn code remains exactly the same...]
+    with col3:
+        # Reset button
+        if st.button("🔄 Reset", use_container_width=True, type="secondary", key="reset_btn"):
+            reset_app_state()
     
     # Display vocabulary when toggled - COMPACT VERSION
     if st.session_state.analysis_complete and st.session_state.get('show_vocabulary', False):
@@ -1839,12 +1851,25 @@ if st.session_state.current_page == "page1":
         
         st.markdown(f'''
         <div class="vocab-display">
-            <h4 style="color: var(--musigma-orange) !important; margin-bottom: 1rem; text-align: center;">Extracted Vocabulary</h4>
+            <h4 style="color: var(--musigma-red) !important; margin-bottom: 1rem; text-align: center;">📚 Extracted Vocabulary</h4>
             {formatted_vocab}
         </div>
         ''', unsafe_allow_html=True)
     
     if analyze_btn:
+        # Validate inputs
+        if not st.session_state.problem_text.strip():
+            st.error("❌ Please enter a business problem description.")
+            st.stop()
+        
+        if st.session_state.account == "Select Account":
+            st.error("❌ Please select an account.")
+            st.stop()
+            
+        if st.session_state.industry == "Select Industry":
+            st.error("❌ Please select an industry.")
+            st.stop()
+        
         full_problem_context = (
             f"The business problem is:\n{st.session_state.problem_text.strip()}\n\n"
             f"Context:\n"
@@ -2009,12 +2034,11 @@ if st.session_state.current_page == "page1":
             ''', unsafe_allow_html=True)
         
         # Dimension Scores
-        st.markdown('<div class="section-title-box"><h3>Dimension Scores</h3></div>', unsafe_allow_html=True)
+        st.markdown('<div class="section-title-box"><h3>📊 Dimension Scores</h3></div>', unsafe_allow_html=True)
         
         col1, col2 = st.columns(2)
         dimensions = ["Volatility", "Ambiguity", "Interconnectedness", "Uncertainty"]
-        # Icons removed to avoid colored emoji rendering; using neutral placeholders instead
-        dimension_icons = ["", "", "", ""]
+        dimension_icons = ["⚡", "❓", "🔗", "🎲"]
         for i, dimension in enumerate(dimensions):
             with col1 if i < 2 else col2:
                 score = st.session_state.dimension_scores.get(dimension, 0.0)
@@ -2026,7 +2050,7 @@ if st.session_state.current_page == "page1":
                 ''', unsafe_allow_html=True)
         
         # SME Justification Section - FULL CONTENT in orange-bordered box
-        st.markdown('<div class="section-title-box"><h3>SME Justification</h3></div>', unsafe_allow_html=True)
+        st.markdown('<div class="section-title-box"><h3>🧠 SME Justification</h3></div>', unsafe_allow_html=True)
 
         # Prefer extracting the full SME Justification from the raw hardness_summary_text to avoid trimmed paragraphs
         full_hs = st.session_state.get('hardness_summary_text', '')
@@ -2046,7 +2070,6 @@ if st.session_state.current_page == "page1":
         if st.button("🔍 View In Detail Analysis →", key="in_detail_main", use_container_width=True, type="primary"):
             st.session_state.current_page = "page2"
             st.rerun()
-
 # -----------------------------
 # PAGE 2: Current System & Pain Points - IMPROVED LAYOUT
 # -----------------------------
@@ -2488,3 +2511,4 @@ st.markdown('''
 })();
 </script>
 ''', unsafe_allow_html=True)
+
