@@ -1,3 +1,4 @@
+
 import streamlit as st
 import requests, json, os, re, time
 import random
@@ -7,12 +8,151 @@ from io import BytesIO
 import unicodedata
 import pandas as pd
 
+# --- Theme toggle state ---
+if 'dark_mode' not in st.session_state:
+    st.session_state.dark_mode = False
+
+# --- Theme toggle (capsule-style single-click selector) ---
+st.markdown('''
+<style>
+.st-theme-toggle-container { position: fixed; left: 18px; top: 18px; z-index: 10001; }
+/* Make the radio look capsule-like where possible */
+.st-theme-toggle-container .stRadio { width: 180px; }
+.st-theme-toggle-container .stRadio .css-1wy0on6 { display: flex; gap: 0; }
+.st-theme-toggle-container .stRadio label[data-baseweb="radio"] { flex: 1; }
+.st-theme-toggle-container .stRadio .stRadio > div > label { border-radius: 999px; padding: 6px 12px; border: 1px solid rgba(0,0,0,0.06); }
+</style>
+''', unsafe_allow_html=True)
+
+with st.container():
+    col1, col2 = st.columns([1, 6])
+    with col1:
+        # Single-click capsule radio for Light / Dark
+        try:
+            theme_choice = st.radio('', options=['Light', 'Dark'], index=(1 if st.session_state.dark_mode else 0), key='theme_radio', horizontal=True)
+        except TypeError:
+            # older Streamlit versions may not support horizontal=True
+            theme_choice = st.radio('', options=['Light', 'Dark'], index=(1 if st.session_state.dark_mode else 0), key='theme_radio')
+
+        st.session_state.dark_mode = (theme_choice == 'Dark')
+
+    with col2:
+        st.markdown('')
+if st.session_state.dark_mode:
+    st.markdown('''
+    <style>
+    :root {
+        --text-primary: #f3f4f6; /* light text */
+        --bg-card: #23272f;     /* dark card bg */
+        --text-light: #ffffff;  /* white text for colored badges */
+        --border-color: rgba(255,255,255,0.06);
+        --accent-orange: #ff6b35;
+        --musigma-red: #8b1e1e;
+        --accent-teal: #0ea5a4;
+    }
+    /* Dark overall background */
+    body, .stApp, .main {
+        background: linear-gradient(135deg, #0b0f14 0%, #18181b 50%, #23272f 100%) !important;
+        color: var(--text-primary) !important;
+    }
+    /* Make all main boxes use Mu-Sigma red gradient and white text for contrast */
+    .info-card, .qa-box, .problem-display, .vocab-display, .section-title-box, .score-badge, .dimension-box, .dimension-display-box {
+        background: linear-gradient(135deg, var(--musigma-red) 0%, var(--accent-orange) 100%) !important;
+        color: var(--text-light) !important;
+        border-color: rgba(255,255,255,0.06) !important;
+        box-shadow: 0 6px 30px rgba(0,0,0,0.45) !important;
+    }
+    /* Business problem text should be white in dark mode */
+    .problem-display, .problem-display p { color: var(--text-light) !important; }
+    /* Inputs use dark backgrounds with light text to match dark theme */
+    .stTextArea textarea, .stTextInput input, .stSelectbox > div > div, .stSelectbox [data-baseweb="select"] {
+        background: #1f2933 !important;
+        color: var(--text-light) !important;
+        border-color: rgba(255,255,255,0.06) !important;
+    }
+    .stButton > button {
+        background: linear-gradient(135deg, var(--musigma-red) 0%, var(--accent-orange) 100%) !important;
+        color: var(--text-light) !important;
+    }
+    /* Ensure headings and labels are readable */
+    h1, h2, h3, h4, h5, h6, .dimension-label, .qa-question, .score-badge *, .hardness-badge-hard, .hardness-badge-moderate, .hardness-badge-easy {
+        color: var(--text-light) !important;
+        text-shadow: 0 1px 4px rgba(0,0,0,0.6);
+    }
+    .theme-toggle-btn {
+        background: transparent !important;
+        color: var(--text-light) !important;
+        border-color: var(--text-light) !important;
+    }
+    .theme-toggle-btn:hover {
+        background: rgba(255,255,255,0.04) !important;
+    }
+    </style>
+    ''', unsafe_allow_html=True)
+else:
+    st.markdown('''
+    <style>
+    :root {
+        --text-primary: #1e293b;
+        --bg-card: #ffffff;
+        --text-light: #ffffff;
+        --border-color: rgba(139, 30, 30, 0.15);
+        --accent-orange: #ff6b35;
+        --musigma-red: #8b1e1e;
+    }
+    body, .stApp, .main {
+        background: linear-gradient(135deg, #fafafa 0%, #f5f5f5 50%, #eeeeee 100%) !important;
+        color: #1e293b !important;
+    }
+    /* Regular content cards: white background, dark text */
+    .info-card, .qa-box, .vocab-display, .section-title-box {
+        background: #fff !important;
+        color: var(--text-primary) !important;
+        border-color: #e5e7eb !important;
+        box-shadow: 0 2px 16px rgba(0,0,0,0.08) !important;
+    }
+    /* Business problem area stays white for readability */
+    .problem-display { background: #fff !important; color: var(--text-primary) !important; border-color: #e5e7eb !important; }
+
+    /* Branded boxes (scores & dimensions) use Mu-Sigma red gradient and white text in light mode too */
+    .score-badge, .dimension-box, .dimension-display-box {
+        background: linear-gradient(135deg, var(--musigma-red) 0%, var(--accent-orange) 100%) !important;
+        color: var(--text-light) !important;
+        border: 3px solid rgba(255,255,255,0.18) !important;
+        box-shadow: var(--shadow-xl) !important;
+    }
+    .score-badge *, .dimension-box *, .dimension-display-box * { color: var(--text-light) !important; }
+    .stTextArea textarea, .stTextInput input, .stSelectbox > div > div, .stSelectbox [data-baseweb="select"] {
+        background: #fff !important;
+        color: #1e293b !important;
+        border-color: #e5e7eb !important;
+    }
+    .stButton > button {
+        background: linear-gradient(135deg, #8b1e1e 0%, #ff6b35 100%) !important;
+        color: #fff !important;
+    }
+    h1, h2, h3, h4, h5, h6, .dimension-label, .qa-question, .score-badge *, .hardness-badge-hard, .hardness-badge-moderate, .hardness-badge-easy {
+        color: #1e293b !important;
+        text-shadow: none;
+    }
+    .theme-toggle-btn {
+        background: #fff !important;
+        color: #8b1e1e !important;
+        border-color: #8b1e1e !important;
+    }
+    .theme-toggle-btn:hover {
+        background: #ffe5e5 !important;
+        border-color: #ff6b35 !important;
+    }
+    </style>
+    ''', unsafe_allow_html=True)
+
 # -----------------------------
 # Config - Page Setup
 # -----------------------------
 st.set_page_config(
     page_title="Business Problem Level Classifier",
-    page_icon="🧠",
+    page_icon=None,
     layout="wide",
     initial_sidebar_state="collapsed"
 )
@@ -216,39 +356,42 @@ h2, h3, h4, h5, h6,
 }
 
 /* --- SECTION TITLE BOXES (CENTERED WITH GRADIENT) --- */
-.section-title-box { 
-    background: linear-gradient(135deg, var(--musigma-red) 0%, var(--accent-orange) 100%);
-    border-radius: 20px; 
-    padding: 2rem 2.5rem; 
-    margin: 3rem 0 2rem 0 !important; 
-    box-shadow: var(--shadow-lg);
-    animation: fadeInUp 0.7s ease-out;
+
+.section-title-box {
+    /* Match the main title look: Mu-Sigma red -> accent orange gradient in all modes */
+    background: linear-gradient(135deg, var(--musigma-red) 0%, var(--accent-orange) 100%) !important;
+    border-radius: 20px;
+    padding: 2.5rem 3rem;
+    margin: 2.5rem 0 1.5rem 0 !important;
+    box-shadow: var(--shadow-lg) !important;
+    /* Explicitly disable decorative animations for section title boxes */
     position: relative;
     overflow: hidden;
     text-align: center;
 }
 
+/* Remove shimmer overlay/animation for these boxes so headings remain fully visible */
 .section-title-box::before {
     content: '';
     position: absolute;
     top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
-    animation: shimmer 3s infinite;
+    left: 0;
+    width: 0;
+    height: 0;
+    background: transparent !important;
+    animation: none !important;
 }
 
 .section-title-box h2,
 .section-title-box h3,
 .section-title-box h4 {
-    color: #ffffff !important;
+    color: var(--text-light) !important; /* ensure white text in all themes */
     margin: 0 !important;
-    font-weight: 800 !important;
-    font-size: 1.8rem !important;
-    font-family: 'Space Grotesk', sans-serif !important;
+    font-weight: 900 !important;
+    font-size: 1.9rem !important;
+    font-family: 'Poppins', sans-serif !important;
     position: relative;
-    z-index: 1;
+    z-index: 2;
     text-align: center !important;
     display: flex;
     align-items: center;
@@ -389,7 +532,7 @@ h2, h3, h4, h5, h6,
 .qa-question { 
     font-weight: 700; 
     font-size: 1.2rem; 
-    color: var(--musigma-red) !important; 
+    color: inherit !important; 
     margin-bottom: 1.5rem; 
     line-height: 1.7; 
     font-family: 'Space Grotesk', sans-serif;
@@ -408,7 +551,7 @@ h2, h3, h4, h5, h6,
 .qa-answer { 
     font-size: 1.05rem; 
     line-height: 1.9; 
-    color: var(--text-primary) !important; 
+    color: inherit !important; 
     white-space: pre-wrap; 
 }
 
@@ -533,7 +676,7 @@ h2, h3, h4, h5, h6,
 }
 
 .dimension-display-box { 
-    background: linear-gradient(135deg, var(--accent-teal) 0%, var(--accent-teal-light) 100%);
+    background: linear-gradient(135deg, var(--musigma-red) 0%, var(--accent-orange) 100%);
 }
 
 .dimension-display-box:hover { 
@@ -545,7 +688,7 @@ h2, h3, h4, h5, h6,
     font-size: 4rem; 
     font-weight: 900; 
     margin: 1.25rem 0; 
-    color: var(--text-light) !important; 
+    color: inherit !important; 
     font-family: 'Poppins', sans-serif;
     text-shadow: 3px 3px 6px rgba(0,0,0,0.3);
     position: relative;
@@ -555,7 +698,7 @@ h2, h3, h4, h5, h6,
 .dimension-label { 
     font-size: 1.35rem; 
     font-weight: 700; 
-    color: rgba(255,255,255,0.98) !important; 
+    color: inherit !important; 
     text-transform: uppercase; 
     letter-spacing: 2px; 
     font-family: 'Space Grotesk', sans-serif;
@@ -591,6 +734,32 @@ h2, h3, h4, h5, h6,
     color: var(--accent-black) !important;
     font-weight: 700 !important;
 }
+
+/* --- SCORE GRID & DIMENSION ITEM STYLES (theme-aware) --- */
+.scores-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+}
+.score-item {
+    padding: 0.75rem;
+    border-radius: 8px;
+    text-align: center;
+    background: rgba(255, 107, 53, 0.05);
+    color: var(--accent-orange);
+}
+.score-item strong { display:block; }
+.score-item .score-value { font-size: 1.2rem; font-weight: 700; color: var(--accent-orange); }
+
+.dim-item { 
+    padding: 1rem; 
+    margin-bottom: 0.75rem; 
+    background: rgba(255, 107, 53, 0.05); 
+    border-radius: 8px; 
+    border-left: 3px solid var(--accent-orange);
+}
+.dim-item strong { color: var(--accent-orange); font-size: 1.1rem; }
+.dim-item .dim-score { font-size: 1.5rem; font-weight: 700; color: var(--accent-orange); }
 
 .vocab-item {
     margin-bottom: 1.25rem !important;
@@ -1742,7 +1911,7 @@ def reset_app_state():
     st.session_state.industry_updated = False
     
     # Use success message without rerun to avoid double execution
-    st.success("🔄 Application state reset. You can start a new analysis.")
+    st.success("Application state reset. You can start a new analysis.")
 # -----------------------------
 # PAGE 1: Business Problem Input & Analysis
 # -----------------------------
@@ -1763,7 +1932,7 @@ if st.session_state.current_page == "page1":
     """, unsafe_allow_html=True)
     
     # Account & Industry Selection - FIXED WITH PROPER DROPDOWN UPDATES
-    st.markdown('<div class="section-title-box"><h3>🏢 Account & Industry Selection</h3></div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-title-box"><h3>Account & Industry Selection</h3></div>', unsafe_allow_html=True)
     
     col1, col2 = st.columns(2)
     
@@ -1829,7 +1998,7 @@ if st.session_state.current_page == "page1":
         """, unsafe_allow_html=True)
     
     # Business Problem Description
-    st.markdown('<div class="section-title-box"><h3>📝 Business Problem Description</h3></div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-title-box"><h3>Business Problem Description</h3></div>', unsafe_allow_html=True)
     
     # Initialize problem_text if not exists
     if 'problem_text' not in st.session_state:
@@ -1849,7 +2018,7 @@ if st.session_state.current_page == "page1":
     
     with col1:
         analyze_btn = st.button(
-            "🚀 Find Out How Hard It Is",
+            "Find Out How Hard It Is",
             type="primary",
             use_container_width=True,
             disabled=not (st.session_state.problem_text.strip() and 
@@ -1861,17 +2030,17 @@ if st.session_state.current_page == "page1":
     with col2:
         # Vocabulary Button - only show after analysis
         if st.session_state.analysis_complete:
-            vocab_label = "📚 Hide Vocabulary" if st.session_state.get('show_vocabulary', False) else "📚 View Vocabulary"
+            vocab_label = "Hide Vocabulary" if st.session_state.get('show_vocabulary', False) else "View Vocabulary"
             if st.button(vocab_label, use_container_width=True, type="secondary", key="vocab_btn"):
                 st.session_state.show_vocabulary = not st.session_state.get('show_vocabulary', False)
                 st.rerun()
         else:
             # Placeholder to maintain layout
-            st.button("📚 Vocabulary", use_container_width=True, disabled=True)
+            st.button("Vocabulary", use_container_width=True, disabled=True)
     
     with col3:
         # Reset button
-        if st.button("🔄 Reset", use_container_width=True, type="secondary", key="reset_btn"):
+        if st.button("Reset", use_container_width=True, type="secondary", key="reset_btn"):
             reset_app_state()
     
     # Display vocabulary when toggled - COMPACT VERSION
@@ -1881,7 +2050,7 @@ if st.session_state.current_page == "page1":
         
         st.markdown(f'''
         <div class="vocab-display">
-            <h4 style="color: var(--musigma-red) !important; margin-bottom: 1rem; text-align: center;">📚 Extracted Vocabulary</h4>
+            <h4 style="color: var(--musigma-red) !important; margin-bottom: 1rem; text-align: center;">Extracted Vocabulary</h4>
             {formatted_vocab}
         </div>
         ''', unsafe_allow_html=True)
@@ -1889,15 +2058,15 @@ if st.session_state.current_page == "page1":
     if analyze_btn:
         # Validate inputs
         if not st.session_state.problem_text.strip():
-            st.error("❌ Please enter a business problem description.")
+            st.error("Please enter a business problem description.")
             st.stop()
         
         if st.session_state.account == "Select Account":
-            st.error("❌ Please select an account.")
+            st.error("Please select an account.")
             st.stop()
             
         if st.session_state.industry == "Select Industry":
-            st.error("❌ Please select an industry.")
+            st.error("Please select an industry.")
             st.stop()
         
         full_problem_context = (
@@ -1918,7 +2087,7 @@ if st.session_state.current_page == "page1":
         HEADERS["Pragma"] = "no-cache"
         HEADERS["Expires"] = "0"
         
-        with st.spinner("🔍 Analyzing your business problem..."):
+        with st.spinner("Analyzing your business problem..."):
             progress_bar = st.progress(0)
             status_text = st.empty()
             st.session_state.outputs = {}
@@ -1938,7 +2107,7 @@ if st.session_state.current_page == "page1":
                 "📋 Generating comprehensive summary...",
                 "🎯 Finalizing hardness classification...",
                 "💡 Identifying key pain points...",
-                "🔄 Analyzing system inputs and outputs...",
+                "Analyzing system inputs and outputs...",
                 "📝 Compiling stakeholder perspectives...",
                 "🔎 Evaluating resource adequacy...",
                 "🏆 Preparing final assessment..."
@@ -1993,7 +2162,7 @@ if st.session_state.current_page == "page1":
 
             session.close()
             progress_bar.progress(1.0)
-            status_text.success("✅ Analysis complete! All steps finished.")
+            status_text.success("Analysis complete! All steps finished.")
             
             # Extract scores from hardness_summary API
             hardness_summary = st.session_state.outputs.get('hardness_summary', '')
@@ -2064,7 +2233,7 @@ if st.session_state.current_page == "page1":
             ''', unsafe_allow_html=True)
         
         # Dimension Scores
-        st.markdown('<div class="section-title-box"><h3>📊 Dimension Scores</h3></div>', unsafe_allow_html=True)
+        st.markdown('<div class="section-title-box"><h3>Dimension Scores</h3></div>', unsafe_allow_html=True)
         
         col1, col2 = st.columns(2)
         dimensions = ["Volatility", "Ambiguity", "Interconnectedness", "Uncertainty"]
@@ -2080,7 +2249,7 @@ if st.session_state.current_page == "page1":
                 ''', unsafe_allow_html=True)
         
         # SME Justification Section - FULL CONTENT in orange-bordered box
-        st.markdown('<div class="section-title-box"><h3>🧠 SME Justification</h3></div>', unsafe_allow_html=True)
+        st.markdown('<div class="section-title-box"><h3>Justification</h3></div>', unsafe_allow_html=True)
 
         # Prefer extracting the full SME Justification from the raw hardness_summary_text to avoid trimmed paragraphs
         full_hs = st.session_state.get('hardness_summary_text', '')
@@ -2097,7 +2266,7 @@ if st.session_state.current_page == "page1":
 
         # Large In Detail Button
         st.markdown("---")
-        if st.button("🔍 View In Detail Analysis →", key="in_detail_main", use_container_width=True, type="primary"):
+        if st.button("View In Detail Analysis →", key="in_detail_main", use_container_width=True, type="primary"):
             st.session_state.current_page = "page2"
             st.rerun()
 # -----------------------------
@@ -2177,7 +2346,7 @@ if st.session_state.current_page == "page2":
 
     # Navigation
     st.markdown("---")
-    if st.button("📊 View Hardness Summary →", use_container_width=True, type="primary"):
+    if st.button("View Hardness Summary →", use_container_width=True, type="primary"):
         st.session_state.current_page = "hardness_summary"
         st.rerun()
 
@@ -2245,7 +2414,7 @@ elif st.session_state.current_page.startswith("dimension_"):
                 st.rerun()
     
     with col2:
-        if st.button("🔄 Reset", use_container_width=True, type="secondary", key=f"reset_{dimension_name}"):
+        if st.button("Reset", use_container_width=True, type="secondary", key=f"reset_{dimension_name}"):
             reset_app_state()
             st.rerun()
     
@@ -2289,7 +2458,7 @@ elif st.session_state.current_page == "hardness_summary":
     # Business Problem
     st.markdown('''
     <div class="section-title-box">
-        <h3>📋 Business Problem</h3>
+        <h3>Business Problem</h3>
     </div>
     ''', unsafe_allow_html=True)
     
@@ -2302,7 +2471,7 @@ elif st.session_state.current_page == "hardness_summary":
     # Display Scores Summary
     st.markdown('''
     <div class="section-title-box">
-        <h3>📈 Score Breakdown</h3>
+        <h3>Score Breakdown</h3>
     </div>
     ''', unsafe_allow_html=True)
     
@@ -2314,9 +2483,9 @@ elif st.session_state.current_page == "hardness_summary":
         </div>
         ''', unsafe_allow_html=True)
         
-        scores_html = '<div class="info-card"><div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem;">'
+        scores_html = '<div class="info-card"><div class="scores-grid">'
         for q, score in sorted(st.session_state.question_scores.items(), key=lambda x: int(x[0][1:])):
-            scores_html += f'<div style="padding: 0.75rem; background: rgba(255, 107, 53, 0.05); border-radius: 8px; text-align: center;"><strong>{q}:</strong><br><span style="font-size: 1.2rem; font-weight: 700; color: var(--accent-orange);">{score:.2f}/5</span></div>'
+            scores_html += f'<div class="score-item"><strong>{q}:</strong><br><span class="score-value">{score:.2f}/5</span></div>'
         scores_html += '</div></div>'
         st.markdown(scores_html, unsafe_allow_html=True)
     
@@ -2334,14 +2503,14 @@ elif st.session_state.current_page == "hardness_summary":
         score = st.session_state.dimension_scores.get(dimension, 0.0)
         questions = DIMENSION_QUESTIONS.get(dimension, [])
         q_list = ", ".join(questions)
-        dimensions_html += f'<div style="padding: 1rem; margin-bottom: 0.75rem; background: rgba(255, 107, 53, 0.05); border-radius: 8px; border-left: 3px solid var(--accent-orange);"><strong style="color: var(--accent-orange); font-size: 1.1rem;">{dimension}</strong><br><span style="color: var(--text-secondary); font-size: 0.9rem;">({q_list})</span><br><span style="font-size: 1.5rem; font-weight: 700; color: var(--accent-orange);">{score:.2f}/5</span></div>'
+        dimensions_html += f'<div class="dim-item"><strong>{dimension}</strong><br><span style="color: var(--text-secondary); font-size: 0.9rem;">({q_list})</span><br><span class="dim-score">{score:.2f}/5</span></div>'
     dimensions_html += '</div>'
     st.markdown(dimensions_html, unsafe_allow_html=True)
     
     # Overall Score and Level
     st.markdown('''
     <div class="section-title-box">
-        <h3>🎯 Overall Classification</h3>
+        <h3>Overall Classification</h3>
     </div>
     ''', unsafe_allow_html=True)
     
@@ -2377,7 +2546,7 @@ elif st.session_state.current_page == "hardness_summary":
     # Comprehensive Analysis
     st.markdown('''
     <div class="section-title-box">
-        <h3>📝 Comprehensive Analysis</h3>
+        <h3>Comprehensive Analysis</h3>
     </div>
     ''', unsafe_allow_html=True)
 
@@ -2521,9 +2690,9 @@ elif st.session_state.current_page == "hardness_summary":
         report_content = "\n".join(report_lines)
         
         # Download button with same styling as other buttons
-        if st.button("📥 Download Full Report", use_container_width=True, type="primary", key="download_report"):
+        if st.button("Download Full Report", use_container_width=True, type="primary", key="download_report"):
             st.download_button(
-                label="📥 Download Full Report",
+                label="Download Full Report",
                 data=report_content,
                 file_name=f"business_problem_analysis_{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt",
                 mime="text/plain",
