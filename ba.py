@@ -1776,10 +1776,8 @@ def calculate_overall_score_from_dimensions(dimension_scores):
 
 def classify_hardness_level(overall_score):
     """Classify hardness level: 0-3.0=Easy, 3.1-4.0=Moderate, 4.1-5.0=Hard"""
-    if overall_score <= 3.0:
-        return "Easy"
-    elif overall_score <= 4.0:
-        return "Moderate"
+    if overall_score <= 4.0:
+        return "Not Hard"
     else:
         return "Hard"
 
@@ -2778,5 +2776,6 @@ st.markdown(f"""
     }});
 </script>
 """, unsafe_allow_html=True)
+
 
 
