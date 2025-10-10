@@ -1412,7 +1412,7 @@ API_CONFIGS = [
             "• Ambiguity: (Q4 + Q5 + Q6) / 3 = [calculation] = [result]\n"
             "• Interconnectedness: (Q7 + Q8 + Q9) / 3 = [calculation] = [result]\n"
             "• Uncertainty: (Q10 + Q11 + Q12) / 3 = [calculation] = [result]\n\n"
-            "Overall Difficulty Score\n"
+            "Overall Hardness Score\n"
             "[Provide calculation and final score]\n\n"
             "Hardness Level\n"
             "[Easy: 0-3.0, Moderate: 3.1-4.0, or Hard: 4.1-5.0]\n\n"
@@ -1484,10 +1484,10 @@ def extract_full_sme_justification(text):
     if not text:
         return ""
     # Look for SME Justification section and extract everything in it.
-    # Be flexible about spacing and headers that follow (Summary, Key Takeaways, Individual Question Scores, Dimension Averages, Overall Difficulty Score, Hardness Level)
+    # Be flexible about spacing and headers that follow (Summary, Key Takeaways, Individual Question Scores, Dimension Averages, Overall Hardness Score, Hardness Level)
     patterns = [
-        r"SME Justification[:\s]*((?:.|\n)*?)(?=\n\s*(?:Summary|Key Takeaways|Key Takeaway|Individual Question Scores|Dimension Averages|Overall Difficulty Score|Hardness Level|$))",
-        r"Justification[:\s]*((?:.|\n)*?)(?=\n\s*(?:Summary|Key Takeaways|Key Takeaway|Individual Question Scores|Dimension Averages|Overall Difficulty Score|Hardness Level|$))",
+        r"SME Justification[:\s]*((?:.|\n)*?)(?=\n\s*(?:Summary|Key Takeaways|Key Takeaway|Individual Question Scores|Dimension Averages|Overall Hardness Score|Hardness Level|$))",
+        r"Justification[:\s]*((?:.|\n)*?)(?=\n\s*(?:Summary|Key Takeaways|Key Takeaway|Individual Question Scores|Dimension Averages|Overall Hardness Score|Hardness Level|$))",
         r"SME[:\s]*((?:.|\n)*)$",
     ]
 
@@ -1573,7 +1573,7 @@ def extract_comprehensive_analysis(text):
 
     # Remove Overall Difficulty Score section
     text = re.sub(
-        r'Overall Difficulty Score.*?(?=\n\nHardness|\n\nSME|\Z)',
+        r'Overall Hardness Score.*?(?=\n\nHardness|\n\nSME|\Z)',
         '',
         text,
         flags=re.IGNORECASE | re.DOTALL
@@ -2229,7 +2229,7 @@ if st.session_state.current_page == "page1":
             overall = st.session_state.overall_score
             st.markdown(f'''
             <div class="score-badge">
-                <div style="font-size: 1.2rem; font-weight: 600; opacity: 0.95; margin-bottom: 0.5rem;">Overall Difficulty Score</div>
+                <div style="font-size: 1.2rem; font-weight: 600; opacity: 0.95; margin-bottom: 0.5rem;">Overall Hardness Score</div>
                 <div style="font-size: 2.8rem; font-weight: 900;">{overall:.2f}/5</div>
             </div>
             ''', unsafe_allow_html=True)
@@ -2521,7 +2521,7 @@ elif st.session_state.current_page == "hardness_summary":
     with col1:
         st.markdown(f'''
         <div class="score-badge" style="margin-bottom: 1rem;">
-            <div style="font-size: 1rem; font-weight: 500; opacity: 0.9; margin-bottom: 0.5rem;">Overall Difficulty Score</div>
+            <div style="font-size: 1rem; font-weight: 500; opacity: 0.9; margin-bottom: 0.5rem;">Overall Hardness Score</div>
             <div style="font-size: 2.5rem; font-weight: 900;">{st.session_state.overall_score:.2f}/5</div>
         </div>
         ''', unsafe_allow_html=True)
@@ -2679,7 +2679,7 @@ elif st.session_state.current_page == "hardness_summary":
         # Overall Classification
         report_lines.append("OVERALL CLASSIFICATION:")
         report_lines.append("-" * 20)
-        report_lines.append(f"  Overall Difficulty Score: {st.session_state.overall_score:.2f}/5")
+        report_lines.append(f"  Overall Hardness Score: {st.session_state.overall_score:.2f}/5")
         report_lines.append(f"  Hardness Level: {st.session_state.hardness_level}")
         report_lines.append("")
         
@@ -2778,4 +2778,5 @@ st.markdown(f"""
     }});
 </script>
 """, unsafe_allow_html=True)
+
 
