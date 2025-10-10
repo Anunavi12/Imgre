@@ -633,7 +633,7 @@ h2, h3, h4, h5, h6,
 }
 
 .hardness-badge-easy { 
-    background: linear-gradient(135deg, var(--accent-teal) 0%, var(--accent-teal-light) 100%);
+    background: linear-gradient(135deg,#53c853 0%, #1d911d 100%);
 }
 
 /* --- DIMENSION BOXES --- */
@@ -2776,6 +2776,7 @@ st.markdown(f"""
     }});
 </script>
 """, unsafe_allow_html=True)
+
 
 
 
