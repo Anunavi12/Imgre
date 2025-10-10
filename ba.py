@@ -1643,39 +1643,41 @@ def format_sme_justification(text):
     
     return text.strip()
 
-def format_vocabulary_with_bold(text):
-    """Format vocabulary with proper bold styling for terms and definitions - COMPACT VERSION"""
+def format_vocabulary_with_bold(text):  
+    """Format vocabulary text with clean headings, spacing, and readable structure"""
     if not text:
         return "No vocabulary data available"
     
     clean_text = sanitize_text(text)
+
+    # --- Fix line breaks between Step sections ---
+    clean_text = re.sub(r'(Step\s*\d+:)', r'\n\n\1', clean_text)
+    clean_text = re.sub(r'(?<=\.)\s*(Step\s*\d+:)', r'\n\n\1', clean_text)
+
+    # --- Preserve numbered list breaks (1., 2., etc.) ---
+    clean_text = re.sub(r'(?<!\n)(\d+\.)', r'\n\1', clean_text)
     
-    # Split into items and format each one compactly
-    items = re.split(r'\n\s*(?=\d+\.)', clean_text)
-    formatted_items = []
+    # --- Make section headers bold ---
+    clean_text = re.sub(r'(?<=\n)(Step\s*\d+:.*?)\n', r'\n<strong>\1</strong>\n', clean_text)
+    clean_text = re.sub(r'(?<=\n)(\d+\.\s*VOCABULARY ANALYSIS)', r'\n<strong>\1</strong>', clean_text)
     
-    for item in items:
-        if not item.strip():
-            continue
-            
-        # Format the term in bold orange
-        item = re.sub(r'^(\d+\.\s*[^•\n:]+)(?=•|$)', r'<strong>\1</strong>', item)
-        
-        # Format definition and implication labels in bold
-        item = re.sub(r'(•\s*)Definition:\s*', r'<br><strong>• Definition:</strong> ', item)
-        item = re.sub(r'(•\s*)Implication:\s*', r'<br><strong>• Implication:</strong> ', item)
-        
-        # Remove extra spacing
-        item = re.sub(r'\s+', ' ', item)
-        formatted_items.append(item.strip())
+    # --- Make KPI formulas and key labels bold ---
+    clean_text = re.sub(r'(\bFormula:)', r'<strong>\1</strong>', clean_text)
+    clean_text = re.sub(r'(\bMeasures:)', r'<strong>\1</strong>', clean_text)
+    clean_text = re.sub(r'(\bImportance:)', r'<strong>\1</strong>', clean_text)
     
-    # Join with minimal spacing
-    result = '<br>'.join(formatted_items)
+    # --- Add line breaks for bullet points and after formulas ---
+    clean_text = re.sub(r'•\s*', r'\n• ', clean_text)
+    clean_text = re.sub(r'(?<=\))\s*•', r'\n•', clean_text)
     
-    # Ensure proper compact spacing
-    result = re.sub(r'<br><br>', '<br>', result)
+    # --- Clean multiple spaces and excessive line breaks ---
+    clean_text = re.sub(r'\n{3,}', '\n\n', clean_text)
+    clean_text = re.sub(r' +', ' ', clean_text)
     
-    return result
+    # --- Wrap final output in pre-like block for consistent spacing ---
+    formatted_output = f"<pre style='white-space: pre-wrap; font-family: Inter, sans-serif;'>{clean_text.strip()}</pre>"
+    
+    return formatted_output
 
 def extract_individual_question_scores(text):
     """Extract scores for Q1-Q12 from the hardness_summary API response"""
@@ -2776,3 +2778,4 @@ st.markdown(f"""
     }});
 </script>
 """, unsafe_allow_html=True)
+
